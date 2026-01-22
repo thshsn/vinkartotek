@@ -40,7 +40,7 @@
           const r = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`);
           const t = await r.text();
           const j = JSON.parse(t.substring(47).slice(0, -2));
-          const ws = j.table.rows.slice(1).map((row, i) => ({
+          const ws = j.table.rows.slice(0).map((row, i) => ({
             id: i + 1,
             name: row.c[0]?.v || '', url: row.c[1]?.v || '', year: row.c[2]?.v || '',
             dateTasted: row.c[3]?.v || '', country: row.c[4]?.v || '', region: row.c[5]?.v || '',
