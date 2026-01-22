@@ -6,193 +6,124 @@
   <title>Vinsmaking</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
-  <div id="app"></div>
+<body>
+  <div id="root"></div>
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
   <script type="text/babel">
     const { useState, useEffect } = React;
     
-    const App = () => {
+    const SHEET_ID = '1QagDAoCbeuAneC0H37PhIVncqUxIslH8lrchBgyfhnA';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_G4MMe8n8RI_Ix-RHR9P-KpEv0p7BceUcJcCjpM5ynH93MJTbjCaIDGeerEupx4Q/exec';
+    
+    function App() {
       const [wines, setWines] = useState([]);
       const [view, setView] = useState('list');
-      const [searchTerm, setSearchTerm] = useState('');
+      const [search, setSearch] = useState('');
       const [showForm, setShowForm] = useState(false);
-      const [editingId, setEditingId] = useState(null);
-      const sheetId = '1QagDAoCbeuAneC0H37PhIVncqUxIslH8lrchBgyfhnA';
-      const scriptUrl = 'https://script.google.com/macros/s/AKfycbz_G4MMe8n8RI_Ix-RHR9P-KpEv0p7BceUcJcCjpM5ynH93MJTbjCaIDGeerEupx4Q/exec';
-      
-      const emptyForm = {
+      const [editId, setEditId] = useState(null);
+      const [form, setForm] = useState({
         name: '', url: '', year: '', dateTasted: new Date().toISOString().split('T')[0],
-        country: '', region: '', subRegion: '', grapes: '', 
+        country: '', region: '', subRegion: '', grapes: '',
         sightClarity: '', sightIntensity: '', sightColor: '',
         noseCondition: '', noseIntensity: '', noseAroma: '',
         sweetness: '', acid: '', tannin: '', body: '', taste: '', length: '', quality: ''
-      };
-      const [formData, setFormData] = useState(emptyForm);
-      const [suggestions, setSuggestions] = useState({});
-      const [activeSugg, setActiveSugg] = useState('');
+      });
 
-      useEffect(() => {
-        loadSheet(sheetId);
-      }, []);
+      useEffect(() => { loadData(); }, []);
 
-      useEffect(() => {
-        const s = {};
-        ['country', 'region', 'subRegion', 'grapes', 'sweetness', 'acid', 'tannin', 'body', 'length'].forEach(f => {
-          s[f] = [...new Set(wines.map(w => w[f]).filter(v => v))];
-        });
-        setSuggestions(s);
-      }, [wines]);
-
-      const loadSheet = async (id) => {
+      const loadData = async () => {
         try {
-          const r = await fetch(`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json`);
+          const r = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`);
           const t = await r.text();
           const j = JSON.parse(t.substring(47).slice(0, -2));
-          const lw = j.table.rows.slice(1).map((row, i) => ({
+          const ws = j.table.rows.slice(1).map((row, i) => ({
             id: i + 1,
-            name: row.c[0]?.v || '', url: row.c[1]?.v || '', year: row.c[2]?.v || '', dateTasted: row.c[3]?.v || '',
-            country: row.c[4]?.v || '', region: row.c[5]?.v || '', subRegion: row.c[6]?.v || '', grapes: row.c[7]?.v || '',
+            name: row.c[0]?.v || '', url: row.c[1]?.v || '', year: row.c[2]?.v || '',
+            dateTasted: row.c[3]?.v || '', country: row.c[4]?.v || '', region: row.c[5]?.v || '',
+            subRegion: row.c[6]?.v || '', grapes: row.c[7]?.v || '',
             sightClarity: row.c[8]?.v || '', sightIntensity: row.c[9]?.v || '', sightColor: row.c[10]?.v || '',
             noseCondition: row.c[11]?.v || '', noseIntensity: row.c[12]?.v || '', noseAroma: row.c[13]?.v || '',
-            sweetness: row.c[14]?.v || '', acid: row.c[15]?.v || '', tannin: row.c[16]?.v || '', body: row.c[17]?.v || '',
-            taste: row.c[18]?.v || '', length: row.c[19]?.v || '', quality: row.c[20]?.v || ''
+            sweetness: row.c[14]?.v || '', acid: row.c[15]?.v || '', tannin: row.c[16]?.v || '',
+            body: row.c[17]?.v || '', taste: row.c[18]?.v || '', length: row.c[19]?.v || '', quality: row.c[20]?.v || ''
           }));
-          setWines(lw);
-        } catch (e) {
-          alert('Feil ved lasting: ' + e.message);
-        }
+          setWines(ws);
+        } catch (e) { alert('Feil: ' + e.message); }
       };
 
-      const handleSubmit = async () => {
-        if (!formData.name) {
-          alert('Vinnavn påkrevd');
-          return;
-        }
+      const save = async () => {
+        if (!form.name) { alert('Navn påkrevd'); return; }
         try {
-          const action = editingId ? 'update' : 'add';
-          const body = editingId ? {
-            action,
-            originalName: wines.find(w => w.id === editingId).name,
-            originalDate: wines.find(w => w.id === editingId).dateTasted,
-            ...formData
-          } : { action, ...formData };
+          const body = editId ? {
+            action: 'update',
+            originalName: wines.find(w => w.id === editId).name,
+            originalDate: wines.find(w => w.id === editId).dateTasted,
+            ...form
+          } : { action: 'add', ...form };
           
-          const r = await fetch(scriptUrl, { method: 'POST', body: JSON.stringify(body) });
+          const r = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(body) });
           const res = await r.json();
           
           if (res.success) {
-            if (editingId) {
-              setWines(wines.map(w => w.id === editingId ? { ...formData, id: editingId } : w));
-            } else {
-              setWines([...wines, { ...formData, id: Date.now() }]);
-            }
+            if (editId) setWines(wines.map(w => w.id === editId ? { ...form, id: editId } : w));
+            else setWines([...wines, { ...form, id: Date.now() }]);
             alert('Lagret!');
-            setFormData(emptyForm);
+            setForm({
+              name: '', url: '', year: '', dateTasted: new Date().toISOString().split('T')[0],
+              country: '', region: '', subRegion: '', grapes: '',
+              sightClarity: '', sightIntensity: '', sightColor: '',
+              noseCondition: '', noseIntensity: '', noseAroma: '',
+              sweetness: '', acid: '', tannin: '', body: '', taste: '', length: '', quality: ''
+            });
             setShowForm(false);
-            setEditingId(null);
-          } else {
-            alert('Feil: ' + res.message);
-          }
-        } catch (e) {
-          alert('Feil ved lagring: ' + e.message);
-        }
+            setEditId(null);
+          } else alert('Feil: ' + res.message);
+        } catch (e) { alert('Feil: ' + e.message); }
       };
 
-      const deleteWine = async (id) => {
-        if (!window.confirm('Slette?')) return;
+      const del = async (id) => {
+        if (!confirm('Slette?')) return;
         try {
           const w = wines.find(w => w.id === id);
-          const r = await fetch(scriptUrl, {
+          const r = await fetch(SCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify({ action: 'delete', name: w.name, dateTasted: w.dateTasted })
           });
           const res = await r.json();
-          if (res.success) {
-            setWines(wines.filter((wine) => wine.id !== id));
-            alert('Slettet!');
-          } else {
-            alert('Feil: ' + res.message);
-          }
-        } catch (e) {
-          alert('Feil ved sletting: ' + e.message);
-        }
+          if (res.success) { setWines(wines.filter(x => x.id !== id)); alert('Slettet!'); }
+          else alert('Feil: ' + res.message);
+        } catch (e) { alert('Feil: ' + e.message); }
       };
 
       const filtered = wines.filter(w => 
-        Object.values(w).some(v => String(v).toLowerCase().includes(searchTerm.toLowerCase()))
+        Object.values(w).some(v => String(v).toLowerCase().includes(search.toLowerCase()))
       );
-
-      const getStats = () => {
-        const cc = {}, gc = {}, mc = {};
-        wines.forEach(w => {
-          if (w.country) cc[w.country] = (cc[w.country] || 0) + 1;
-          if (w.grapes) w.grapes.split(',').forEach(g => { const t = g.trim(); if (t) gc[t] = (gc[t] || 0) + 1; });
-          if (w.dateTasted) { const m = new Date(w.dateTasted).toLocaleString('default', { month: 'long' }); mc[m] = (mc[m] || 0) + 1; }
-        });
-        return { cc, gc, mc };
-      };
-      const stats = getStats();
 
       return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-6">
           <div className="max-w-7xl mx-auto">
             <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
               <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                  </svg>
-                  <h1 className="text-3xl font-bold">Vinsmaking</h1>
-                </div>
+                <h1 className="text-3xl font-bold">🍷 Vinsmaking</h1>
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => setShowForm(true)}
-                    className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
-                  >
-                    <span className="text-xl">+</span>
-                    Legg til vin
+                  <button onClick={() => setShowForm(true)} className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                    + Legg til
                   </button>
-                  <button
-                    onClick={() => {
-                      loadSheet(sheetId);
-                      alert('Data oppdatert!');
-                    }}
-                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                  >
+                  <button onClick={() => { loadData(); alert('Oppdatert!'); }} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
                     ↻ Oppdater
                   </button>
                 </div>
               </div>
               
               <div className="flex gap-4 mb-6">
-                <button
-                  onClick={() => setView('list')}
-                  className={`px-4 py-2 rounded-lg ${view === 'list' ? 'bg-purple-600 text-white' : 'bg-gray-200'}`}
-                >
-                  Utforsk
-                </button>
-                <button
-                  onClick={() => setView('stats')}
-                  className={`px-4 py-2 rounded-lg ${view === 'stats' ? 'bg-purple-600 text-white' : 'bg-gray-200'}`}
-                >
-                  Statistikk
-                </button>
+                <button onClick={() => setView('list')} className={`px-4 py-2 rounded-lg ${view === 'list' ? 'bg-purple-600 text-white' : 'bg-gray-200'}`}>Utforsk</button>
+                <button onClick={() => setView('stats')} className={`px-4 py-2 rounded-lg ${view === 'stats' ? 'bg-purple-600 text-white' : 'bg-gray-200'}`}>Statistikk</button>
               </div>
 
-              {view === 'list' && (
-                <input
-                  type="text"
-                  placeholder="Søk..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-3 border rounded-lg"
-                />
-              )}
+              {view === 'list' && <input type="text" placeholder="Søk..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full px-4 py-3 border rounded-lg" />}
             </div>
 
             {view === 'list' && (
@@ -202,58 +133,27 @@
                     {wines.length === 0 ? 'Ingen viner' : 'Ingen match'}
                   </div>
                 ) : (
-                  filtered.map((w) => (
+                  filtered.map(w => (
                     <div key={w.id} className="bg-white rounded-lg shadow-lg p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-2xl font-bold">{w.name}</h3>
-                            {w.year && <span className="text-lg text-purple-600 font-semibold">{w.year}</span>}
-                          </div>
-                          <div className="flex gap-4 text-sm text-gray-600">
-                            {w.country && <span>🌍 {w.country}</span>}
-                            {w.region && <span>📍 {w.region}</span>}
-                            {w.dateTasted && <span>📅 {w.dateTasted}</span>}
+                      <div className="flex justify-between mb-4">
+                        <div>
+                          <h3 className="text-2xl font-bold">{w.name} {w.year && <span className="text-purple-600">{w.year}</span>}</h3>
+                          <div className="text-sm text-gray-600">
+                            {w.country && <span>🌍 {w.country}</span>} {w.region && <span className="ml-4">📍 {w.region}</span>}
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          {w.url && (
-                            <a href={w.url} target="_blank" rel="noopener noreferrer" className="p-2 text-purple-600">
-                              🔗
-                            </a>
-                          )}
-                          <button
-                            onClick={() => {
-                              setFormData(w);
-                              setEditingId(w.id);
-                              setShowForm(true);
-                            }}
-                            className="px-3 py-1 bg-blue-500 text-white rounded"
-                          >
-                            Rediger
-                          </button>
-                          <button
-                            onClick={() => deleteWine(w.id)}
-                            className="px-3 py-1 bg-red-500 text-white rounded"
-                          >
-                            Slett
-                          </button>
+                          {w.url && <a href={w.url} target="_blank" className="px-3 py-1 text-purple-600">🔗</a>}
+                          <button onClick={() => { setForm(w); setEditId(w.id); setShowForm(true); }} className="px-3 py-1 bg-blue-500 text-white rounded">Rediger</button>
+                          <button onClick={() => del(w.id)} className="px-3 py-1 bg-red-500 text-white rounded">Slett</button>
                         </div>
                       </div>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        {w.grapes && <div><span className="text-xs text-gray-500 font-semibold">Druer</span><p className="text-sm">{w.grapes}</p></div>}
-                        {w.subRegion && <div><span className="text-xs text-gray-500 font-semibold">Underregion</span><p className="text-sm">{w.subRegion}</p></div>}
-                        {w.quality && <div><span className="text-xs text-gray-500 font-semibold">Kvalitet</span><p className="text-sm font-bold text-purple-600">{w.quality} ⭐</p></div>}
-                        {w.body && <div><span className="text-xs text-gray-500 font-semibold">Kropp</span><p className="text-sm">{w.body}</p></div>}
-                      </div>
-                      
-                      {(w.sweetness || w.acid || w.tannin || w.length) && (
-                        <div className="flex gap-4 mt-4 text-xs flex-wrap">
+                      {w.quality && <div className="mb-2"><span className="text-purple-600 font-bold">{w.quality} ⭐</span></div>}
+                      {(w.sweetness || w.acid || w.tannin) && (
+                        <div className="flex gap-2 text-xs">
                           {w.sweetness && <span className="bg-purple-100 px-2 py-1 rounded">Sødme: {w.sweetness}</span>}
                           {w.acid && <span className="bg-green-100 px-2 py-1 rounded">Syrlighet: {w.acid}</span>}
                           {w.tannin && <span className="bg-red-100 px-2 py-1 rounded">Tannin: {w.tannin}</span>}
-                          {w.length && <span className="bg-blue-100 px-2 py-1 rounded">Lengde: {w.length}</span>}
                         </div>
                       )}
                     </div>
@@ -263,317 +163,101 @@
             )}
 
             {view === 'stats' && (
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h3 className="text-xl font-bold mb-4">Land</h3>
-                  {Object.entries(stats.cc).length > 0 ? (
-                    <div className="space-y-2">
-                      {Object.entries(stats.cc).sort((a, b) => b[1] - a[1]).map(([c, n]) => (
-                        <div key={c} className="flex items-center gap-2">
-                          <div className="flex-1 bg-gray-200 rounded-full h-6">
-                            <div className="bg-purple-600 h-6 rounded-full flex items-center justify-end px-2" style={{ width: `${(n / wines.length) * 100}%` }}>
-                              <span className="text-xs text-white font-semibold">{n}</span>
-                            </div>
-                          </div>
-                          <span className="text-sm font-medium w-32">{c}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : <p className="text-gray-500">Ingen data</p>}
-                </div>
-                
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h3 className="text-xl font-bold mb-4">Topp druer</h3>
-                  {Object.entries(stats.gc).length > 0 ? (
-                    <div className="space-y-2">
-                      {Object.entries(stats.gc).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([g, n]) => (
-                        <div key={g} className="flex items-center gap-2">
-                          <div className="flex-1 bg-gray-200 rounded-full h-6">
-                            <div className="bg-green-600 h-6 rounded-full flex items-center justify-end px-2" style={{ width: `${(n / wines.length) * 100}%` }}>
-                              <span className="text-xs text-white font-semibold">{n}</span>
-                            </div>
-                          </div>
-                          <span className="text-sm font-medium w-32">{g}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : <p className="text-gray-500">Ingen data</p>}
-                </div>
-                
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h3 className="text-xl font-bold mb-4">Sammendrag</h3>
-                  <div className="space-y-4">
-                    <div><p className="text-3xl font-bold text-purple-600">{wines.length}</p><p className="text-gray-600">Viner</p></div>
-                    <div><p className="text-3xl font-bold text-green-600">{Object.keys(stats.cc).length}</p><p className="text-gray-600">Land</p></div>
-                    <div><p className="text-3xl font-bold text-pink-600">{Object.keys(stats.gc).length}</p><p className="text-gray-600">Druer</p></div>
-                  </div>
-                </div>
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <h3 className="text-xl font-bold mb-4">Sammendrag</h3>
+                <p className="text-3xl font-bold text-purple-600">{wines.length}</p>
+                <p>Totalt viner</p>
               </div>
             )}
 
             {showForm && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" style={{ overflow: 'auto' }}>
-                <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full my-8" style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
-                  <div className="flex justify-between items-center p-6 border-b" style={{ flexShrink: 0 }}>
-                    <h2 className="text-2xl font-bold">{editingId ? 'Rediger' : 'Ny vin'}</h2>
-                    <button
-                      onClick={() => {
-                        setShowForm(false);
-                        setEditingId(null);
-                        setFormData(emptyForm);
-                      }}
-                      className="p-2 hover:bg-gray-100 rounded text-2xl"
-                    >
-                      ×
-                    </button>
+              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-auto">
+                <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full my-8 max-h-screen overflow-y-auto">
+                  <div className="sticky top-0 bg-white p-6 border-b flex justify-between">
+                    <h2 className="text-2xl font-bold">{editId ? 'Rediger' : 'Ny vin'}</h2>
+                    <button onClick={() => { setShowForm(false); setEditId(null); }} className="text-2xl">×</button>
                   </div>
-                  <div className="p-6" style={{ flex: 1, overflowY: 'auto' }}>
-                    <div className="space-y-4">
-                      <div className="flex gap-4">
-                        <div className="flex-1">
-                          <label className="block text-sm font-medium mb-2">Vinnavn *</label>
-                          <input
-                            type="text"
-                            value={formData.name}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              const match = val.match(/\b(19|20)\d{2}\b/);
-                              setFormData((p) => ({
-                                ...p,
-                                name: val,
-                                year: p.year === '' && match ? match[0] : p.year
-                              }));
-                            }}
-                            className="w-full px-4 py-2 border rounded-lg"
-                          />
-                        </div>
-                        <div style={{ width: '120px' }}>
-                          <label className="block text-sm font-medium mb-2">År</label>
-                          <input
-                            type="text"
-                            value={formData.year}
-                            onChange={(e) => setFormData((p) => ({ ...p, year: e.target.value }))}
-                            className="w-full px-4 py-2 border rounded-lg"
-                          />
-                        </div>
+                  <div className="p-6 space-y-4">
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium mb-2">Vinnavn *</label>
+                        <input type="text" value={form.name} onChange={(e) => {
+                          const v = e.target.value;
+                          const m = v.match(/\b(19|20)\d{2}\b/);
+                          setForm(p => ({ ...p, name: v, year: !p.year && m ? m[0] : p.year }));
+                        }} className="w-full px-4 py-2 border rounded-lg" />
                       </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">URL</label>
-                        <input
-                          type="url"
-                          value={formData.url}
-                          onChange={(e) => setFormData((p) => ({ ...p, url: e.target.value }))}
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Dato smakt</label>
-                        <input
-                          type="date"
-                          value={formData.dateTasted}
-                          onChange={(e) => setFormData((p) => ({ ...p, dateTasted: e.target.value }))}
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-4">
-                        {[
-                          { f: 'country', l: 'Land' },
-                          { f: 'region', l: 'Region' },
-                          { f: 'subRegion', l: 'Underregion' }
-                        ].map(({ f, l }) => (
-                          <div key={f} className="relative">
-                            <label className="block text-sm font-medium mb-2">{l}</label>
-                            <input
-                              type="text"
-                              value={formData[f]}
-                              onChange={(e) => setFormData((p) => ({ ...p, [f]: e.target.value }))}
-                              onFocus={() => {
-                                if (suggestions[f]?.length > 0) setActiveSugg(f);
-                              }}
-                              onBlur={() => setTimeout(() => setActiveSugg(''), 200)}
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                            {activeSugg === f && suggestions[f]?.length > 0 && (
-                              <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                {suggestions[f].map((s, i) => (
-                                  <button
-                                    key={i}
-                                    type="button"
-                                    onClick={() => {
-                                      setFormData((p) => ({ ...p, [f]: s }));
-                                      setActiveSugg('');
-                                    }}
-                                    className="w-full text-left px-4 py-2 hover:bg-purple-50"
-                                  >
-                                    {s}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Druer</label>
-                        <input
-                          type="text"
-                          value={formData.grapes}
-                          onChange={(e) => setFormData((p) => ({ ...p, grapes: e.target.value }))}
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
-                      </div>
-
-                      <div>
-                        <h3 className="text-sm font-semibold mb-2">Utseende</h3>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[
-                            { f: 'sightClarity', l: 'Klarhet' },
-                            { f: 'sightIntensity', l: 'Intensitet' },
-                            { f: 'sightColor', l: 'Farge' }
-                          ].map(({ f, l }) => (
-                            <div key={f}>
-                              <label className="block text-xs font-medium mb-1">{l}</label>
-                              <input
-                                type="text"
-                                value={formData[f]}
-                                onChange={(e) => setFormData((p) => ({ ...p, [f]: e.target.value }))}
-                                className="w-full px-3 py-2 border rounded-lg text-sm"
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="text-sm font-semibold mb-2">Duft</h3>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[
-                            { f: 'noseCondition', l: 'Tilstand' },
-                            { f: 'noseIntensity', l: 'Intensitet' }
-                          ].map(({ f, l }) => (
-                            <div key={f}>
-                              <label className="block text-xs font-medium mb-1">{l}</label>
-                              <input
-                                type="text"
-                                value={formData[f]}
-                                onChange={(e) => setFormData((p) => ({ ...p, [f]: e.target.value }))}
-                                className="w-full px-3 py-2 border rounded-lg text-sm"
-                              />
-                            </div>
-                          ))}
-                          <div>
-                            <label className="block text-xs font-medium mb-1">Aroma</label>
-                            <textarea
-                              value={formData.noseAroma}
-                              onChange={(e) => setFormData((p) => ({ ...p, noseAroma: e.target.value }))}
-                              rows={2}
-                              className="w-full px-3 py-2 border rounded-lg text-sm resize-none"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="text-sm font-semibold mb-3">Smak</h3>
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-4 gap-2">
-                            {[
-                              { f: 'sweetness', l: 'Sødme' },
-                              { f: 'acid', l: 'Syrlighet' },
-                              { f: 'tannin', l: 'Tannin' },
-                              { f: 'body', l: 'Kropp' }
-                            ].map(({ f, l }) => (
-                              <div key={f}>
-                                <label className="block text-xs font-medium mb-1">{l}</label>
-                                <input
-                                  type="text"
-                                  value={formData[f]}
-                                  onChange={(e) => setFormData((p) => ({ ...p, [f]: e.target.value }))}
-                                  className="w-full px-3 py-2 border rounded-lg text-sm"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium mb-2">Smak (beskrivelse)</label>
-                              <textarea
-                                value={formData.taste}
-                                onChange={(e) => setFormData((p) => ({ ...p, taste: e.target.value }))}
-                                rows={3}
-                                className="w-full px-4 py-2 border rounded-lg"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-2">Lengde</label>
-                              <input
-                                type="text"
-                                value={formData.length}
-                                onChange={(e) => setFormData((p) => ({ ...p, length: e.target.value }))}
-                                className="w-full px-4 py-2 border rounded-lg"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Kvalitet</label>
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map((star) => {
-                            const currentRating = parseFloat(formData.quality) || 0;
-                            const isFull = currentRating >= star;
-                            const isHalf = currentRating === star - 0.5;
-                            
-                            return (
-                              <div
-                                key={star}
-                                className="cursor-pointer text-4xl select-none"
-                                onClick={() => {
-                                  if (currentRating === star) {
-                                    setFormData((p) => ({ ...p, quality: (star - 0.5).toString() }));
-                                  } else {
-                                    setFormData((p) => ({ ...p, quality: star.toString() }));
-                                  }
-                                }}
-                              >
-                                {isFull ? (
-                                  <span className="text-yellow-400">★</span>
-                                ) : isHalf ? (
-                                  <span className="text-yellow-400">⯨</span>
-                                ) : (
-                                  <span className="text-gray-300">★</span>
-                                )}
-                              </div>
-                            );
-                          })}
-                          {formData.quality && (
-                            <span className="ml-2 text-sm text-gray-600">
-                              ({formData.quality} stjerner)
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Klikk på en stjerne for full score. Klikk igjen for halv stjerne.
-                        </p>
+                      <div style={{width:'120px'}}>
+                        <label className="block text-sm font-medium mb-2">År</label>
+                        <input type="text" value={form.year} onChange={(e) => setForm(p => ({ ...p, year: e.target.value }))} className="w-full px-4 py-2 border rounded-lg" />
                       </div>
                     </div>
+                    <input type="url" placeholder="URL" value={form.url} onChange={(e) => setForm(p => ({ ...p, url: e.target.value }))} className="w-full px-4 py-2 border rounded-lg" />
+                    <input type="date" value={form.dateTasted} onChange={(e) => setForm(p => ({ ...p, dateTasted: e.target.value }))} className="w-full px-4 py-2 border rounded-lg" />
+                    <div className="grid grid-cols-3 gap-4">
+                      <input placeholder="Land" value={form.country} onChange={(e) => setForm(p => ({ ...p, country: e.target.value }))} className="px-4 py-2 border rounded-lg" />
+                      <input placeholder="Region" value={form.region} onChange={(e) => setForm(p => ({ ...p, region: e.target.value }))} className="px-4 py-2 border rounded-lg" />
+                      <input placeholder="Underregion" value={form.subRegion} onChange={(e) => setForm(p => ({ ...p, subRegion: e.target.value }))} className="px-4 py-2 border rounded-lg" />
+                    </div>
+                    <input placeholder="Druer" value={form.grapes} onChange={(e) => setForm(p => ({ ...p, grapes: e.target.value }))} className="w-full px-4 py-2 border rounded-lg" />
+                    <div>
+                      <h3 className="font-semibold mb-2">Utseende</h3>
+                      <div className="grid grid-cols-3 gap-2">
+                        <input placeholder="Klarhet" value={form.sightClarity} onChange={(e) => setForm(p => ({ ...p, sightClarity: e.target.value }))} className="px-3 py-2 border rounded-lg text-sm" />
+                        <input placeholder="Intensitet" value={form.sightIntensity} onChange={(e) => setForm(p => ({ ...p, sightIntensity: e.target.value }))} className="px-3 py-2 border rounded-lg text-sm" />
+                        <input placeholder="Farge" value={form.sightColor} onChange={(e) => setForm(p => ({ ...p, sightColor: e.target.value }))} className="px-3 py-2 border rounded-lg text-sm" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-2">Duft</h3>
+                      <div className="grid grid-cols-3 gap-2">
+                        <input placeholder="Tilstand" value={form.noseCondition} onChange={(e) => setForm(p => ({ ...p, noseCondition: e.target.value }))} className="px-3 py-2 border rounded-lg text-sm" />
+                        <input placeholder="Intensitet" value={form.noseIntensity} onChange={(e) => setForm(p => ({ ...p, noseIntensity: e.target.value }))} className="px-3 py-2 border rounded-lg text-sm" />
+                        <textarea placeholder="Aroma" value={form.noseAroma} onChange={(e) => setForm(p => ({ ...p, noseAroma: e.target.value }))} rows={2} className="px-3 py-2 border rounded-lg text-sm resize-none" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-2">Smak</h3>
+                      <div className="grid grid-cols-4 gap-2 mb-2">
+                        <input placeholder="Sødme" value={form.sweetness} onChange={(e) => setForm(p => ({ ...p, sweetness: e.target.value }))} className="px-3 py-2 border rounded-lg text-sm" />
+                        <input placeholder="Syrlighet" value={form.acid} onChange={(e) => setForm(p => ({ ...p, acid: e.target.value }))} className="px-3 py-2 border rounded-lg text-sm" />
+                        <input placeholder="Tannin" value={form.tannin} onChange={(e) => setForm(p => ({ ...p, tannin: e.target.value }))} className="px-3 py-2 border rounded-lg text-sm" />
+                        <input placeholder="Kropp" value={form.body} onChange={(e) => setForm(p => ({ ...p, body: e.target.value }))} className="px-3 py-2 border rounded-lg text-sm" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <textarea placeholder="Smak" value={form.taste} onChange={(e) => setForm(p => ({ ...p, taste: e.target.value }))} rows={3} className="px-4 py-2 border rounded-lg" />
+                        <input placeholder="Lengde" value={form.length} onChange={(e) => setForm(p => ({ ...p, length: e.target.value }))} className="px-4 py-2 border rounded-lg" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Kvalitet</label>
+                      <div className="flex gap-1">
+                        {[1,2,3,4,5].map(s => {
+                          const cr = parseFloat(form.quality) || 0;
+                          return (
+                            <span key={s} onClick={() => setForm(p => ({ ...p, quality: (cr === s ? s - 0.5 : s).toString() }))} className="text-4xl cursor-pointer select-none">
+                              {cr >= s ? '★' : cr === s - 0.5 ? '⯨' : '☆'}
+                            </span>
+                          );
+                        })}
+                        {form.quality && <span className="ml-2 text-sm">({form.quality})</span>}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Klikk for full stjerne. Klikk igjen for halv.</p>
+                    </div>
                   </div>
-                  <div className="flex gap-4 p-6 border-t" style={{ flexShrink: 0 }}>
-                    <button
-                      onClick={handleSubmit}
-                      className="flex-1 bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700"
-                    >
-                      {editingId ? 'Oppdater' : 'Legg til'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowForm(false);
-                        setEditingId(null);
-                        setFormData(emptyForm);
-                      }}
-                      className
+                  <div className="sticky bottom-0 bg-white flex gap-4 p-6 border-t">
+                    <button onClick={save} className="flex-1 bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700">{editId ? 'Oppdater' : 'Legg til'}</button>
+                    <button onClick={() => { setShowForm(false); setEditId(null); }} className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold">Avbryt</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
