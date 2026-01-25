@@ -63,12 +63,19 @@
           const t = await r.text();
           const j = JSON.parse(t.substring(47).slice(0, -2));
           const ws = j.table.rows.slice(0).map((row, i) => {
-            // Parse quality - just use the value directly now that column format is fixed
+            // Parse quality - strip leading single quote if present
             let qualityValue = '';
             if (row.c[20]?.v !== null && row.c[20]?.v !== undefined) {
               qualityValue = String(row.c[20].v);
+              // Remove leading single quote if present
+              if (qualityValue.startsWith("'")) {
+                qualityValue = qualityValue.substring(1);
+              }
             } else if (row.c[20]?.f) {
               qualityValue = row.c[20].f;
+              if (qualityValue.startsWith("'")) {
+                qualityValue = qualityValue.substring(1);
+              }
             }
             
             return {
