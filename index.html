@@ -19,11 +19,29 @@
     const SHEET_ID = '1QagDAoCbeuAneC0H37PhIVncqUxIslH8lrchBgyfhnA';
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyX1qUO2jWSAynR65Ik5c35mp7dyWJMkSSQelRtbmFOyLGsYlS2_8jCoaLNUW9WZVA/exec';
     
+    // Helper function to format date from Google Sheets
+    const formatDate = (dateValue) => {
+      if (!dateValue) return '';
+      if (typeof dateValue === 'string' && dateValue.includes('-')) return dateValue;
+      if (typeof dateValue === 'string' && dateValue.startsWith('Date(')) {
+        const match = dateValue.match(/Date\((\d+),(\d+),(\d+)\)/);
+        if (match) {
+          const year = parseInt(match[1]);
+          const month = String(parseInt(match[2]) + 1).padStart(2, '0');
+          const day = String(parseInt(match[3])).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        }
+      }
+      return dateValue;
+    };
+    
     function App() {
       const [wines, setWines] = useState([]);
       const [view, setView] = useState('list');
       const [search, setSearch] = useState('');
       const [sortBy, setSortBy] = useState('newest');
+      const [filterWineType, setFilterWineType] = useState('');
+      const [filterCountry, setFilterCountry] = useState('');
       const [showForm, setShowForm] = useState(false);
       const [showDetails, setShowDetails] = useState(false);
       const [selectedWine, setSelectedWine] = useState(null);
@@ -44,16 +62,26 @@
           const r = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`);
           const t = await r.text();
           const j = JSON.parse(t.substring(47).slice(0, -2));
-          const ws = j.table.rows.slice(0).map((row, i) => ({
-            id: i + 1,
-            name: row.c[0]?.v || '', url: row.c[1]?.v || '', wineType: row.c[2]?.v || '',
-            dateTasted: row.c[3]?.v || '', country: row.c[4]?.v || '', region: row.c[5]?.v || '',
-            subRegion: row.c[6]?.v || '', grapes: row.c[7]?.v || '',
-            sightClarity: row.c[8]?.v || '', sightIntensity: row.c[9]?.v || '', sightColor: row.c[10]?.v || '',
-            noseCondition: row.c[11]?.v || '', noseIntensity: row.c[12]?.v || '', noseAroma: row.c[13]?.v || '',
-            sweetness: row.c[14]?.v || '', acid: row.c[15]?.v || '', tannin: row.c[16]?.v || '',
-            body: row.c[17]?.v || '', taste: row.c[18]?.v || '', length: row.c[19]?.v || '', quality: row.c[20]?.v || ''
-          }));
+          const ws = j.table.rows.slice(0).map((row, i) => {
+            // Parse quality - handle both direct values and formatted values
+            let qualityValue = '';
+            if (row.c[20]?.v !== null && row.c[20]?.v !== undefined) {
+              qualityValue = String(row.c[20].v);
+            } else if (row.c[20]?.f) {
+              qualityValue = row.c[20].f;
+            }
+            
+            return {
+              id: i + 1,
+              name: row.c[0]?.v || '', url: row.c[1]?.v || '', wineType: row.c[2]?.v || '',
+              dateTasted: formatDate(row.c[3]?.v) || '', country: row.c[4]?.v || '', region: row.c[5]?.v || '',
+              subRegion: row.c[6]?.v || '', grapes: row.c[7]?.v || '',
+              sightClarity: row.c[8]?.v || '', sightIntensity: row.c[9]?.v || '', sightColor: row.c[10]?.v || '',
+              noseCondition: row.c[11]?.v || '', noseIntensity: row.c[12]?.v || '', noseAroma: row.c[13]?.v || '',
+              sweetness: row.c[14]?.v || '', acid: row.c[15]?.v || '', tannin: row.c[16]?.v || '',
+              body: row.c[17]?.v || '', taste: row.c[18]?.v || '', length: row.c[19]?.v || '', quality: qualityValue
+            };
+          });
           setWines(ws);
         } catch (e) { alert('Feil: ' + e.message); }
       };
@@ -105,9 +133,14 @@
         } catch (e) { alert('Feil: ' + e.message); }
       };
 
-      const filtered = wines.filter(w => 
-        Object.values(w).some(v => String(v).toLowerCase().includes(search.toLowerCase()))
-      );
+      const filtered = wines.filter(w => {
+        const matchesSearch = Object.values(w).some(v => String(v).toLowerCase().includes(search.toLowerCase()));
+        const matchesWineType = !filterWineType || w.wineType === filterWineType;
+        const matchesCountry = !filterCountry || w.country === filterCountry;
+        return matchesSearch && matchesWineType && matchesCountry;
+      });
+
+      const uniqueCountries = [...new Set(wines.map(w => w.country).filter(Boolean))].sort();
 
       const sorted = [...filtered].sort((a, b) => {
         if (sortBy === 'newest') return b.id - a.id;
@@ -143,14 +176,32 @@
               </div>
 
               {view === 'list' && (
-                <div className="flex gap-4 mb-4">
-                  <input type="text" placeholder="Søk..." value={search} onChange={(e) => setSearch(e.target.value)} className="flex-1 px-4 py-3 border rounded-lg" />
-                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-4 py-3 border rounded-lg">
-                    <option value="newest">Nyeste først</option>
-                    <option value="quality">Kvalitet</option>
-                    <option value="country">Land</option>
-                    <option value="wineType">Type vin</option>
-                  </select>
+                <div className="space-y-4">
+                  <input type="text" placeholder="Søk..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full px-4 py-3 border rounded-lg" />
+                  <div className="flex gap-4">
+                    <select value={filterWineType} onChange={(e) => setFilterWineType(e.target.value)} className="flex-1 px-4 py-3 border rounded-lg">
+                      <option value="">Alle typer</option>
+                      <option value="Rødvin">Rødvin</option>
+                      <option value="Hvitvin">Hvitvin</option>
+                      <option value="Rosévin">Rosévin</option>
+                      <option value="Orangevin">Orangevin</option>
+                      <option value="Musserende vin">Musserende vin</option>
+                      <option value="Musserende rosévin">Musserende rosévin</option>
+                      <option value="Dessertvin">Dessertvin</option>
+                    </select>
+                    <select value={filterCountry} onChange={(e) => setFilterCountry(e.target.value)} className="flex-1 px-4 py-3 border rounded-lg">
+                      <option value="">Alle land</option>
+                      {uniqueCountries.map(country => (
+                        <option key={country} value={country}>{country}</option>
+                      ))}
+                    </select>
+                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="flex-1 px-4 py-3 border rounded-lg">
+                      <option value="newest">Nyeste først</option>
+                      <option value="quality">Kvalitet</option>
+                      <option value="country">Land</option>
+                      <option value="wineType">Type vin</option>
+                    </select>
+                  </div>
                 </div>
               )}
             </div>
