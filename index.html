@@ -17,7 +17,7 @@
     const { useState, useEffect } = React;
     
     const SHEET_ID = '1QagDAoCbeuAneC0H37PhIVncqUxIslH8lrchBgyfhnA';
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_G4MMe8n8RI_Ix-RHR9P-KpEv0p7BceUcJcCjpM5ynH93MJTbjCaIDGeerEupx4Q/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyX1qUO2jWSAynR65Ik5c35mp7dyWJMkSSQelRtbmFOyLGsYlS2_8jCoaLNUW9WZVA/exec';
     
     function App() {
       const [wines, setWines] = useState([]);
@@ -25,8 +25,9 @@
       const [search, setSearch] = useState('');
       const [showForm, setShowForm] = useState(false);
       const [editId, setEditId] = useState(null);
+      const [saving, setSaving] = useState(false);
       const [form, setForm] = useState({
-        name: '', url: '', year: '', dateTasted: new Date().toISOString().split('T')[0],
+        name: '', url: '', dateTasted: new Date().toISOString().split('T')[0],
         country: '', region: '', subRegion: '', grapes: '',
         sightClarity: '', sightIntensity: '', sightColor: '',
         noseCondition: '', noseIntensity: '', noseAroma: '',
@@ -42,13 +43,13 @@
           const j = JSON.parse(t.substring(47).slice(0, -2));
           const ws = j.table.rows.slice(0).map((row, i) => ({
             id: i + 1,
-            name: row.c[0]?.v || '', url: row.c[1]?.v || '', year: row.c[2]?.v || '',
-            dateTasted: row.c[3]?.v || '', country: row.c[4]?.v || '', region: row.c[5]?.v || '',
-            subRegion: row.c[6]?.v || '', grapes: row.c[7]?.v || '',
-            sightClarity: row.c[8]?.v || '', sightIntensity: row.c[9]?.v || '', sightColor: row.c[10]?.v || '',
-            noseCondition: row.c[11]?.v || '', noseIntensity: row.c[12]?.v || '', noseAroma: row.c[13]?.v || '',
-            sweetness: row.c[14]?.v || '', acid: row.c[15]?.v || '', tannin: row.c[16]?.v || '',
-            body: row.c[17]?.v || '', taste: row.c[18]?.v || '', length: row.c[19]?.v || '', quality: row.c[20]?.v || ''
+            name: row.c[0]?.v || '', url: row.c[1]?.v || '',
+            dateTasted: row.c[2]?.v || '', country: row.c[3]?.v || '', region: row.c[4]?.v || '',
+            subRegion: row.c[5]?.v || '', grapes: row.c[6]?.v || '',
+            sightClarity: row.c[7]?.v || '', sightIntensity: row.c[8]?.v || '', sightColor: row.c[9]?.v || '',
+            noseCondition: row.c[10]?.v || '', noseIntensity: row.c[11]?.v || '', noseAroma: row.c[12]?.v || '',
+            sweetness: row.c[13]?.v || '', acid: row.c[14]?.v || '', tannin: row.c[15]?.v || '',
+            body: row.c[16]?.v || '', taste: row.c[17]?.v || '', length: row.c[18]?.v || '', quality: row.c[19]?.v || ''
           }));
           setWines(ws);
         } catch (e) { alert('Feil: ' + e.message); }
@@ -56,6 +57,9 @@
 
       const save = async () => {
         if (!form.name) { alert('Navn påkrevd'); return; }
+        if (saving) return;
+        
+        setSaving(true);
         try {
           const body = editId ? {
             action: 'update',
@@ -70,9 +74,8 @@
           if (res.success) {
             if (editId) setWines(wines.map(w => w.id === editId ? { ...form, id: editId } : w));
             else setWines([...wines, { ...form, id: Date.now() }]);
-            alert('Lagret!');
             setForm({
-              name: '', url: '', year: '', dateTasted: new Date().toISOString().split('T')[0],
+              name: '', url: '', dateTasted: new Date().toISOString().split('T')[0],
               country: '', region: '', subRegion: '', grapes: '',
               sightClarity: '', sightIntensity: '', sightColor: '',
               noseCondition: '', noseIntensity: '', noseAroma: '',
@@ -82,6 +85,7 @@
             setEditId(null);
           } else alert('Feil: ' + res.message);
         } catch (e) { alert('Feil: ' + e.message); }
+        finally { setSaving(false); }
       };
 
       const del = async (id) => {
@@ -137,7 +141,7 @@
                     <div key={w.id} className="bg-white rounded-lg shadow-lg p-6">
                       <div className="flex justify-between mb-4">
                         <div>
-                          <h3 className="text-2xl font-bold">{w.name} {w.year && <span className="text-purple-600">{w.year}</span>}</h3>
+                          <h3 className="text-2xl font-bold">{w.name}</h3>
                           <div className="text-sm text-gray-600">
                             {w.country && <span>🌍 {w.country}</span>} {w.region && <span className="ml-4">📍 {w.region}</span>}
                           </div>
@@ -178,19 +182,9 @@
                     <button onClick={() => { setShowForm(false); setEditId(null); }} className="text-2xl">×</button>
                   </div>
                   <div className="p-6 space-y-4">
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <label className="block text-sm font-medium mb-2">Vinnavn *</label>
-                        <input type="text" value={form.name} onChange={(e) => {
-                          const v = e.target.value;
-                          const m = v.match(/\b(19|20)\d{2}\b/);
-                          setForm(p => ({ ...p, name: v, year: !p.year && m ? m[0] : p.year }));
-                        }} className="w-full px-4 py-2 border rounded-lg" />
-                      </div>
-                      <div style={{width:'120px'}}>
-                        <label className="block text-sm font-medium mb-2">År</label>
-                        <input type="text" value={form.year} onChange={(e) => setForm(p => ({ ...p, year: e.target.value }))} className="w-full px-4 py-2 border rounded-lg" />
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Vinnavn *</label>
+                      <input type="text" value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} className="w-full px-4 py-2 border rounded-lg" />
                     </div>
                     <input type="url" placeholder="URL" value={form.url} onChange={(e) => setForm(p => ({ ...p, url: e.target.value }))} className="w-full px-4 py-2 border rounded-lg" />
                     <input type="date" value={form.dateTasted} onChange={(e) => setForm(p => ({ ...p, dateTasted: e.target.value }))} className="w-full px-4 py-2 border rounded-lg" />
@@ -236,7 +230,7 @@
                           const cr = parseFloat(form.quality) || 0;
                           return (
                             <span key={s} onClick={() => setForm(p => ({ ...p, quality: (cr === s ? s - 0.5 : s).toString() }))} className="text-4xl cursor-pointer select-none">
-                              {cr >= s ? '★' : cr === s - 0.5 ? '⯨' : '☆'}
+                              {cr >= s ? '★' : cr === s - 0.5 ? '½' : '☆'}
                             </span>
                           );
                         })}
@@ -246,7 +240,13 @@
                     </div>
                   </div>
                   <div className="sticky bottom-0 bg-white flex gap-4 p-6 border-t">
-                    <button onClick={save} className="flex-1 bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700">{editId ? 'Oppdater' : 'Legg til'}</button>
+                    <button 
+                      onClick={save} 
+                      disabled={saving}
+                      className={`flex-1 py-3 rounded-lg font-semibold ${saving ? 'bg-purple-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'} text-white`}
+                    >
+                      {saving ? 'Lagrer...' : (editId ? 'Oppdater' : 'Legg til')}
+                    </button>
                     <button onClick={() => { setShowForm(false); setEditId(null); }} className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold">Avbryt</button>
                   </div>
                 </div>
