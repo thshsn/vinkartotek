@@ -63,10 +63,18 @@
           const t = await r.text();
           const j = JSON.parse(t.substring(47).slice(0, -2));
           const ws = j.table.rows.slice(0).map((row, i) => {
-            // Parse quality - handle both direct values and formatted values
+            // Parse quality - handle both direct values and date serial numbers
             let qualityValue = '';
             if (row.c[20]?.v !== null && row.c[20]?.v !== undefined) {
-              qualityValue = String(row.c[20].v);
+              const rawValue = row.c[20].v;
+              // Check if it's an Excel date serial number (46144-46148 range corresponds to early 2026)
+              if (typeof rawValue === 'number' && rawValue >= 46144 && rawValue <= 46148) {
+                // Convert Excel serial number back to rating
+                // 46144 = 2.5, 46145 = 3.5, 46146 = 4.5, etc.
+                qualityValue = String(rawValue - 46143.5);
+              } else {
+                qualityValue = String(rawValue);
+              }
             } else if (row.c[20]?.f) {
               qualityValue = row.c[20].f;
             }
