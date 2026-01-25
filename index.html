@@ -27,7 +27,7 @@
       const [editId, setEditId] = useState(null);
       const [saving, setSaving] = useState(false);
       const [form, setForm] = useState({
-        name: '', url: '', dateTasted: new Date().toISOString().split('T')[0],
+        name: '', url: '', wineType: '', dateTasted: new Date().toISOString().split('T')[0],
         country: '', region: '', subRegion: '', grapes: '',
         sightClarity: '', sightIntensity: '', sightColor: '',
         noseCondition: '', noseIntensity: '', noseAroma: '',
@@ -43,13 +43,13 @@
           const j = JSON.parse(t.substring(47).slice(0, -2));
           const ws = j.table.rows.slice(0).map((row, i) => ({
             id: i + 1,
-            name: row.c[0]?.v || '', url: row.c[1]?.v || '',
-            dateTasted: row.c[2]?.v || '', country: row.c[3]?.v || '', region: row.c[4]?.v || '',
-            subRegion: row.c[5]?.v || '', grapes: row.c[6]?.v || '',
-            sightClarity: row.c[7]?.v || '', sightIntensity: row.c[8]?.v || '', sightColor: row.c[9]?.v || '',
-            noseCondition: row.c[10]?.v || '', noseIntensity: row.c[11]?.v || '', noseAroma: row.c[12]?.v || '',
-            sweetness: row.c[13]?.v || '', acid: row.c[14]?.v || '', tannin: row.c[15]?.v || '',
-            body: row.c[16]?.v || '', taste: row.c[17]?.v || '', length: row.c[18]?.v || '', quality: row.c[19]?.v || ''
+            name: row.c[0]?.v || '', url: row.c[1]?.v || '', wineType: row.c[2]?.v || '',
+            dateTasted: row.c[3]?.v || '', country: row.c[4]?.v || '', region: row.c[5]?.v || '',
+            subRegion: row.c[6]?.v || '', grapes: row.c[7]?.v || '',
+            sightClarity: row.c[8]?.v || '', sightIntensity: row.c[9]?.v || '', sightColor: row.c[10]?.v || '',
+            noseCondition: row.c[11]?.v || '', noseIntensity: row.c[12]?.v || '', noseAroma: row.c[13]?.v || '',
+            sweetness: row.c[14]?.v || '', acid: row.c[15]?.v || '', tannin: row.c[16]?.v || '',
+            body: row.c[17]?.v || '', taste: row.c[18]?.v || '', length: row.c[19]?.v || '', quality: row.c[20]?.v || ''
           }));
           setWines(ws);
         } catch (e) { alert('Feil: ' + e.message); }
@@ -75,7 +75,7 @@
             if (editId) setWines(wines.map(w => w.id === editId ? { ...form, id: editId } : w));
             else setWines([...wines, { ...form, id: Date.now() }]);
             setForm({
-              name: '', url: '', dateTasted: new Date().toISOString().split('T')[0],
+              name: '', url: '', wineType: '', dateTasted: new Date().toISOString().split('T')[0],
               country: '', region: '', subRegion: '', grapes: '',
               sightClarity: '', sightIntensity: '', sightColor: '',
               noseCondition: '', noseIntensity: '', noseAroma: '',
@@ -186,8 +186,26 @@
                       <label className="block text-sm font-medium mb-2">Vinnavn *</label>
                       <input type="text" value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} className="w-full px-4 py-2 border rounded-lg" />
                     </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Type vin</label>
+                        <select value={form.wineType} onChange={(e) => setForm(p => ({ ...p, wineType: e.target.value }))} className="w-full px-4 py-2 border rounded-lg">
+                          <option value="">Velg type</option>
+                          <option value="Rødvin">Rødvin</option>
+                          <option value="Hvitvin">Hvitvin</option>
+                          <option value="Rosévin">Rosévin</option>
+                          <option value="Orangevin">Orangevin</option>
+                          <option value="Musserende vin">Musserende vin</option>
+                          <option value="Musserende rosévin">Musserende rosévin</option>
+                          <option value="Dessertvin">Dessertvin</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Dato</label>
+                        <input type="date" value={form.dateTasted} onChange={(e) => setForm(p => ({ ...p, dateTasted: e.target.value }))} className="w-full px-4 py-2 border rounded-lg" />
+                      </div>
+                    </div>
                     <input type="url" placeholder="URL" value={form.url} onChange={(e) => setForm(p => ({ ...p, url: e.target.value }))} className="w-full px-4 py-2 border rounded-lg" />
-                    <input type="date" value={form.dateTasted} onChange={(e) => setForm(p => ({ ...p, dateTasted: e.target.value }))} className="w-full px-4 py-2 border rounded-lg" />
                     <div className="grid grid-cols-3 gap-4">
                       <input placeholder="Land" value={form.country} onChange={(e) => setForm(p => ({ ...p, country: e.target.value }))} className="px-4 py-2 border rounded-lg" />
                       <input placeholder="Region" value={form.region} onChange={(e) => setForm(p => ({ ...p, region: e.target.value }))} className="px-4 py-2 border rounded-lg" />
