@@ -42,6 +42,8 @@
       const [sortBy, setSortBy] = useState('newest');
       const [filterWineType, setFilterWineType] = useState('');
       const [filterCountry, setFilterCountry] = useState('');
+      const [filterRegion, setFilterRegion] = useState('');
+      const [filterSubRegion, setFilterSubRegion] = useState('');
       const [showForm, setShowForm] = useState(false);
       const [showDetails, setShowDetails] = useState(false);
       const [selectedWine, setSelectedWine] = useState(null);
@@ -144,10 +146,22 @@
         const matchesSearch = Object.values(w).some(v => String(v).toLowerCase().includes(search.toLowerCase()));
         const matchesWineType = !filterWineType || w.wineType === filterWineType;
         const matchesCountry = !filterCountry || w.country === filterCountry;
-        return matchesSearch && matchesWineType && matchesCountry;
+        const matchesRegion = !filterRegion || w.region === filterRegion;
+        const matchesSubRegion = !filterSubRegion || w.subRegion === filterSubRegion;
+        return matchesSearch && matchesWineType && matchesCountry && matchesRegion && matchesSubRegion;
       });
 
       const uniqueCountries = [...new Set(wines.map(w => w.country).filter(Boolean))].sort();
+      
+      // Get regions for selected country
+      const uniqueRegions = filterCountry 
+        ? [...new Set(wines.filter(w => w.country === filterCountry).map(w => w.region).filter(Boolean))].sort()
+        : [];
+      
+      // Get subregions for selected region
+      const uniqueSubRegions = filterRegion 
+        ? [...new Set(wines.filter(w => w.country === filterCountry && w.region === filterRegion).map(w => w.subRegion).filter(Boolean))].sort()
+        : [];
 
       const sorted = [...filtered].sort((a, b) => {
         if (sortBy === 'newest') return b.id - a.id;
@@ -185,8 +199,8 @@
               {view === 'list' && (
                 <div className="space-y-4">
                   <input type="text" placeholder="Søk..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full px-4 py-3 border rounded-lg" />
-                  <div className="flex gap-4">
-                    <select value={filterWineType} onChange={(e) => setFilterWineType(e.target.value)} className="flex-1 px-4 py-3 border rounded-lg">
+                  <div className="grid grid-cols-2 gap-4">
+                    <select value={filterWineType} onChange={(e) => setFilterWineType(e.target.value)} className="px-4 py-3 border rounded-lg">
                       <option value="">Alle typer</option>
                       <option value="Rødvin">Rødvin</option>
                       <option value="Hvitvin">Hvitvin</option>
@@ -196,17 +210,52 @@
                       <option value="Musserende rosévin">Musserende rosévin</option>
                       <option value="Dessertvin">Dessertvin</option>
                     </select>
-                    <select value={filterCountry} onChange={(e) => setFilterCountry(e.target.value)} className="flex-1 px-4 py-3 border rounded-lg">
+                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-4 py-3 border rounded-lg">
+                      <option value="newest">Nyeste først</option>
+                      <option value="quality">Kvalitet</option>
+                      <option value="country">Land</option>
+                      <option value="wineType">Type vin</option>
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <select 
+                      value={filterCountry} 
+                      onChange={(e) => {
+                        setFilterCountry(e.target.value);
+                        setFilterRegion('');
+                        setFilterSubRegion('');
+                      }} 
+                      className="px-4 py-3 border rounded-lg"
+                    >
                       <option value="">Alle land</option>
                       {uniqueCountries.map(country => (
                         <option key={country} value={country}>{country}</option>
                       ))}
                     </select>
-                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="flex-1 px-4 py-3 border rounded-lg">
-                      <option value="newest">Nyeste først</option>
-                      <option value="quality">Kvalitet</option>
-                      <option value="country">Land</option>
-                      <option value="wineType">Type vin</option>
+                    <select 
+                      value={filterRegion} 
+                      onChange={(e) => {
+                        setFilterRegion(e.target.value);
+                        setFilterSubRegion('');
+                      }}
+                      disabled={!filterCountry}
+                      className={`px-4 py-3 border rounded-lg ${!filterCountry ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    >
+                      <option value="">Alle regioner</option>
+                      {uniqueRegions.map(region => (
+                        <option key={region} value={region}>{region}</option>
+                      ))}
+                    </select>
+                    <select 
+                      value={filterSubRegion} 
+                      onChange={(e) => setFilterSubRegion(e.target.value)}
+                      disabled={!filterRegion}
+                      className={`px-4 py-3 border rounded-lg ${!filterRegion ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    >
+                      <option value="">Alle underregioner</option>
+                      {uniqueSubRegions.map(subRegion => (
+                        <option key={subRegion} value={subRegion}>{subRegion}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -228,6 +277,7 @@
                           <div className="text-sm text-gray-600">
                             {w.wineType && <span className="mr-4">🍷 {w.wineType}</span>}
                             {w.country && <span>🌍 {w.country}</span>} {w.region && <span className="ml-4">📍 {w.region}</span>}
+                            {w.dateTasted && <span className="ml-4">📅 {w.dateTasted}</span>}
                           </div>
                         </div>
                         <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
