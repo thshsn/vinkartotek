@@ -63,6 +63,8 @@
       const [selectedWine, setSelectedWine] = useState(null);
       const [editId, setEditId] = useState(null);
       const [saving, setSaving] = useState(false);
+      const [statsCountryFilter, setStatsCountryFilter] = useState('');
+      const [statsRegionFilter, setStatsRegionFilter] = useState('');
       const [form, setForm] = useState({
         name: '', url: '', wineType: '', dateTasted: new Date().toISOString().split('T')[0],
         country: '', region: '', subRegion: '', grapes: '',
@@ -337,16 +339,145 @@
 
             {view === 'stats' && (
               <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h3 className="text-xl font-bold mb-4">Sammendrag</h3>
-                  <p className="text-3xl font-bold text-slate-700">{wines.length}</p>
-                  <p>Totalt viner</p>
-                </div>
+                {/* Filter wines for statistics based on country and region */}
+                {(() => {
+                  const statsWines = wines.filter(w => {
+                    if (statsCountryFilter && w.country !== statsCountryFilter) return false;
+                    if (statsRegionFilter && w.region !== statsRegionFilter) return false;
+                    return true;
+                  });
+
+                  return (
+                    <>
+                      <div className="bg-white rounded-lg shadow-lg p-6">
+                        <h3 className="text-xl font-bold mb-4">Sammendrag</h3>
+                        <p className="text-3xl font-bold text-slate-700">{statsWines.length}</p>
+                        <p>Totalt viner</p>
+                      </div>
+
+                      {/* Country/Region/Subregion statistics */}
+                      {(() => {
+                        // Get available countries
+                        const countries = [...new Set(wines.map(w => w.country).filter(Boolean))].sort();
+                        
+                        // Get available regions for selected country
+                        const regions = statsCountryFilter 
+                          ? [...new Set(wines.filter(w => w.country === statsCountryFilter).map(w => w.region).filter(Boolean))].sort()
+                          : [];
+
+                        // Determine what to show in the pie chart
+                        let chartTitle = 'Land';
+                        let chartData = {};
+                        
+                        if (!statsCountryFilter) {
+                          // Show countries
+                          statsWines.forEach(w => {
+                            if (w.country) {
+                              chartData[w.country] = (chartData[w.country] || 0) + 1;
+                            }
+                          });
+                        } else if (!statsRegionFilter) {
+                          // Show regions for selected country
+                          chartTitle = `Regioner i ${statsCountryFilter}`;
+                          statsWines.forEach(w => {
+                            const key = w.region || 'Ingen region';
+                            chartData[key] = (chartData[key] || 0) + 1;
+                          });
+                        } else {
+                          // Show subregions for selected region
+                          chartTitle = `Underregioner i ${statsRegionFilter}`;
+                          statsWines.forEach(w => {
+                            const key = w.subRegion || 'Ingen underregion';
+                            chartData[key] = (chartData[key] || 0) + 1;
+                          });
+                        }
+
+                        const data = Object.entries(chartData).sort((a, b) => b[1] - a[1]);
+                        const total = data.reduce((sum, [, count]) => sum + count, 0);
+
+                        return data.length > 0 && (
+                          <div className="bg-white rounded-lg shadow-lg p-6">
+                            <div className="flex items-center gap-4 mb-4">
+                              <h3 className="text-xl font-bold">{chartTitle}</h3>
+                              <select 
+                                value={statsCountryFilter} 
+                                onChange={(e) => { 
+                                  setStatsCountryFilter(e.target.value); 
+                                  setStatsRegionFilter(''); 
+                                }} 
+                                className="px-3 py-1 border rounded text-sm"
+                              >
+                                <option value="">Alle land</option>
+                                {countries.map(c => (
+                                  <option key={c} value={c}>{c}</option>
+                                ))}
+                              </select>
+                              {statsCountryFilter && (
+                                <select 
+                                  value={statsRegionFilter} 
+                                  onChange={(e) => setStatsRegionFilter(e.target.value)} 
+                                  className="px-3 py-1 border rounded text-sm"
+                                >
+                                  <option value="">Alle regioner</option>
+                                  {regions.map(r => (
+                                    <option key={r} value={r}>{r}</option>
+                                  ))}
+                                </select>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div>
+                                <ul className="space-y-2">
+                                  {data.map(([name, count]) => (
+                                    <li key={name} className="flex justify-between items-center">
+                                      <span>{name}</span>
+                                      <span className="font-semibold">{count} ({Math.round(count/total*100)}%)</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                              <div className="flex items-center justify-center">
+                                <svg viewBox="0 0 200 200" className="w-80 h-80">
+                                  {(() => {
+                                    let currentAngle = 0;
+                                    const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524', '#0f172a', '#71717a', '#52525b'];
+                                    const segments = [];
+                                    data.forEach(([name, count], idx) => {
+                                      const percentage = count / total;
+                                      const angle = percentage * 360;
+                                      const endAngle = currentAngle + angle;
+                                      const x1 = 100 + 80 * Math.cos((currentAngle - 90) * Math.PI / 180);
+                                      const y1 = 100 + 80 * Math.sin((currentAngle - 90) * Math.PI / 180);
+                                      const x2 = 100 + 80 * Math.cos((endAngle - 90) * Math.PI / 180);
+                                      const y2 = 100 + 80 * Math.sin((endAngle - 90) * Math.PI / 180);
+                                      const largeArc = angle > 180 ? 1 : 0;
+                                      const path = `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`;
+                                      
+                                      const midAngle = (currentAngle + endAngle) / 2;
+                                      const labelX = 100 + 50 * Math.cos((midAngle - 90) * Math.PI / 180);
+                                      const labelY = 100 + 50 * Math.sin((midAngle - 90) * Math.PI / 180);
+                                      
+                                      segments.push(
+                                        <g key={name}>
+                                          <path d={path} fill={colors[idx % colors.length]} />
+                                          {percentage > 0.05 && <text x={labelX} y={labelY} fontSize="9" fill="white" textAnchor="middle" fontWeight="bold">{name}</text>}
+                                        </g>
+                                      );
+                                      currentAngle = endAngle;
+                                    });
+                                    return segments;
+                                  })()}
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
 
                 {/* Type vin statistics */}
                 {(() => {
                   const wineTypeCounts = {};
-                  wines.forEach(w => {
+                  statsWines.forEach(w => {
                     if (w.wineType) {
                       wineTypeCounts[w.wineType] = (wineTypeCounts[w.wineType] || 0) + 1;
                     }
@@ -407,74 +538,10 @@
                   );
                 })()}
 
-                {/* Land statistics */}
-                {(() => {
-                  const countryCounts = {};
-                  wines.forEach(w => {
-                    if (w.country) {
-                      countryCounts[w.country] = (countryCounts[w.country] || 0) + 1;
-                    }
-                  });
-                  const countryData = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]);
-                  const total = countryData.reduce((sum, [, count]) => sum + count, 0);
-                  
-                  return countryData.length > 0 && (
-                    <div className="bg-white rounded-lg shadow-lg p-6">
-                      <h3 className="text-xl font-bold mb-4">Land</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <ul className="space-y-2">
-                            {countryData.map(([country, count]) => (
-                              <li key={country} className="flex justify-between items-center">
-                                <span>{country}</span>
-                                <span className="font-semibold">{count} ({Math.round(count/total*100)}%)</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="flex items-center justify-center">
-                          <svg viewBox="0 0 200 200" className="w-80 h-80">
-                            {(() => {
-                              let currentAngle = 0;
-                              const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524', '#0f172a', '#71717a'];
-                              const segments = [];
-                              countryData.forEach(([country, count], idx) => {
-                                const percentage = count / total;
-                                const angle = percentage * 360;
-                                const endAngle = currentAngle + angle;
-                                const x1 = 100 + 80 * Math.cos((currentAngle - 90) * Math.PI / 180);
-                                const y1 = 100 + 80 * Math.sin((currentAngle - 90) * Math.PI / 180);
-                                const x2 = 100 + 80 * Math.cos((endAngle - 90) * Math.PI / 180);
-                                const y2 = 100 + 80 * Math.sin((endAngle - 90) * Math.PI / 180);
-                                const largeArc = angle > 180 ? 1 : 0;
-                                const path = `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`;
-                                
-                                // Calculate label position
-                                const midAngle = (currentAngle + endAngle) / 2;
-                                const labelX = 100 + 50 * Math.cos((midAngle - 90) * Math.PI / 180);
-                                const labelY = 100 + 50 * Math.sin((midAngle - 90) * Math.PI / 180);
-                                
-                                segments.push(
-                                  <g key={country}>
-                                    <path d={path} fill={colors[idx % colors.length]} />
-                                    {percentage > 0.05 && <text x={labelX} y={labelY} fontSize="9" fill="white" textAnchor="middle" fontWeight="bold">{country}</text>}
-                                  </g>
-                                );
-                                currentAngle = endAngle;
-                              });
-                              return segments;
-                            })()}
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-
                 {/* Druer statistics */}
                 {(() => {
                   const grapeCounts = {};
-                  wines.forEach(w => {
+                  statsWines.forEach(w => {
                     if (w.grapes) {
                       // Parse grapes field: "Tempranillo 100%", "Cabernet Sauvignon 60%, Merlot 40%", etc.
                       const grapeEntries = w.grapes.split(',').map(g => g.trim());
@@ -548,7 +615,7 @@
                 {/* Quality statistics */}
                 {(() => {
                   const qualityCounts = {};
-                  wines.forEach(w => {
+                  statsWines.forEach(w => {
                     if (w.quality) {
                       const rating = parseFloat(w.quality);
                       if (!isNaN(rating)) {
@@ -610,6 +677,9 @@
                         </div>
                       </div>
                     </div>
+                  );
+                })()}
+                    </>
                   );
                 })()}
               </div>
