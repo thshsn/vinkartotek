@@ -464,7 +464,7 @@
                             {grapeData.map(([grape, count]) => (
                               <li key={grape} className="flex justify-between items-center">
                                 <span>{grape}</span>
-                                <span className="font-semibold">{Math.round(count)}% ({Math.round(count/total*100)}%)</span>
+                                <span className="font-semibold">{Math.round(count/total*100)}%</span>
                               </li>
                             ))}
                           </ul>
