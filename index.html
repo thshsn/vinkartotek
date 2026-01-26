@@ -313,7 +313,22 @@
                           <button onClick={(e) => { e.stopPropagation(); del(w.id); }} className="px-3 py-1 bg-red-500 text-white rounded">Slett</button>
                         </div>
                       </div>
-                      {w.quality && <div className="mb-2"><span className="text-slate-700 font-bold">{parseFloat(w.quality) || 0} ⭐</span></div>}
+                      {w.quality && (
+                        <div className="mb-2">
+                          <span className="text-slate-700 font-bold text-xl">
+                            {(() => {
+                              const rating = parseFloat(w.quality) || 0;
+                              let stars = '';
+                              for (let i = 1; i <= 5; i++) {
+                                if (rating >= i) stars += '★';
+                                else if (rating >= i - 0.5) stars += '½';
+                                else stars += '☆';
+                              }
+                              return stars;
+                            })()}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   ))
                 )}
@@ -553,7 +568,7 @@
                           <ul className="space-y-2">
                             {qualityData.map(([rating, count]) => (
                               <li key={rating} className="flex justify-between items-center">
-                                <span>{rating} ⭐</span>
+                                <span>{rating}★</span>
                                 <span className="font-semibold">{count} ({Math.round(count/total*100)}%)</span>
                               </li>
                             ))}
@@ -584,7 +599,7 @@
                                 segments.push(
                                   <g key={rating}>
                                     <path d={path} fill={colors[idx % colors.length]} />
-                                    {percentage > 0.05 && <text x={labelX} y={labelY} fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">{rating}⭐</text>}
+                                    {percentage > 0.05 && <text x={labelX} y={labelY} fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">{rating}★</text>}
                                   </g>
                                 );
                                 currentAngle = endAngle;
@@ -754,12 +769,11 @@
                           {[1,2,3,4,5].map(s => {
                             const cr = parseFloat(selectedWine.quality) || 0;
                             return (
-                              <span key={s} className="text-4xl">
+                              <span key={s} className="text-4xl text-slate-700">
                                 {cr >= s ? '★' : cr >= s - 0.5 ? '½' : '☆'}
                               </span>
                             );
                           })}
-                          <span className="ml-2 text-sm">({selectedWine.quality})</span>
                         </div>
                       </div>
                     )}
