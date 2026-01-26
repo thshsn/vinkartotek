@@ -357,13 +357,26 @@
 
                       {/* Country/Region/Subregion statistics */}
                       {(() => {
-                        // Get available countries
-                        const countries = [...new Set(wines.map(w => w.country).filter(Boolean))].sort();
+                        // Get available countries sorted by count
+                        const countryCounts = {};
+                        wines.forEach(w => {
+                          if (w.country) countryCounts[w.country] = (countryCounts[w.country] || 0) + 1;
+                        });
+                        const countries = Object.entries(countryCounts)
+                          .sort((a, b) => b[1] - a[1])
+                          .map(([country]) => country);
                         
-                        // Get available regions for selected country
-                        const regions = statsCountryFilter 
-                          ? [...new Set(wines.filter(w => w.country === statsCountryFilter).map(w => w.region).filter(Boolean))].sort()
-                          : [];
+                        // Get available regions for selected country, sorted by count
+                        let regions = [];
+                        if (statsCountryFilter) {
+                          const regionCounts = {};
+                          wines.filter(w => w.country === statsCountryFilter).forEach(w => {
+                            if (w.region) regionCounts[w.region] = (regionCounts[w.region] || 0) + 1;
+                          });
+                          regions = Object.entries(regionCounts)
+                            .sort((a, b) => b[1] - a[1])
+                            .map(([region]) => region);
+                        }
 
                         // Determine what to show in the pie chart
                         let chartTitle = 'Land';
@@ -436,7 +449,7 @@
                                   ))}
                                 </ul>
                               </div>
-                              <div className="flex items-center justify-center">
+                              <div className="flex items-start justify-center">
                                 <svg viewBox="0 0 200 200" className="w-80 h-80">
                                   {(() => {
                                     let currentAngle = 0;
@@ -499,7 +512,7 @@
                             ))}
                           </ul>
                         </div>
-                        <div className="flex items-center justify-center">
+                        <div className="flex items-start justify-center">
                           <svg viewBox="0 0 200 200" className="w-80 h-80">
                             {(() => {
                               let currentAngle = 0;
@@ -572,7 +585,7 @@
                             ))}
                           </ul>
                         </div>
-                        <div className="flex items-center justify-center">
+                        <div className="flex items-start justify-center">
                           <svg viewBox="0 0 200 200" className="w-80 h-80">
                             {(() => {
                               let currentAngle = 0;
@@ -641,7 +654,7 @@
                             ))}
                           </ul>
                         </div>
-                        <div className="flex items-center justify-center">
+                        <div className="flex items-start justify-center">
                           <svg viewBox="0 0 200 200" className="w-80 h-80">
                             {(() => {
                               let currentAngle = 0;
