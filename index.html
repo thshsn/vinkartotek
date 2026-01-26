@@ -40,11 +40,11 @@
       const emojiMap = {
         'Rødvin': '🍷',
         'Hvitvin': '🥂',
-        'Rosévin': '🌸',
-        'Orangevin': '🟠',
-        'Musserende vin': '🍾',
-        'Musserende rosévin': '💗',
-        'Dessertvin': '🍯'
+        'Rosévin': '🍷',
+        'Orangevin': '🍷',
+        'Musserende vin': '🥂',
+        'Musserende rosévin': '🥂',
+        'Dessertvin': '🍷'
       };
       return emojiMap[wineType] || '🍷';
     };
@@ -299,10 +299,12 @@
                       <div className="flex justify-between mb-4">
                         <div>
                           <h3 className="text-2xl font-bold">{w.name}</h3>
-                          <div className="text-sm text-gray-600">
-                            {w.wineType && <span className="mr-4">{getWineTypeEmoji(w.wineType)} {w.wineType}</span>}
-                            {w.country && <span>🌍 {w.country}</span>} {w.region && <span className="ml-4">📍 {w.region}</span>}
-                            {w.dateTasted && <span className="ml-4">📅 {w.dateTasted}</span>}
+                          <div className="text-sm">
+                            {w.wineType && <span className="mr-4 text-gray-900">{w.wineType}</span>}
+                            {w.country && <span className="text-gray-700">{w.country}</span>}
+                            {w.region && <span className="ml-2 text-gray-600">{w.region}</span>}
+                            {w.subRegion && <span className="ml-2 text-gray-500">{w.subRegion}</span>}
+                            {w.dateTasted && <span className="ml-4 text-gray-600">{w.dateTasted}</span>}
                           </div>
                         </div>
                         <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
@@ -352,10 +354,10 @@
                           </ul>
                         </div>
                         <div className="flex items-center justify-center">
-                          <svg viewBox="0 0 200 200" className="w-64 h-64">
+                          <svg viewBox="0 0 200 200" className="w-80 h-80">
                             {(() => {
                               let currentAngle = 0;
-                              const colors = ['#64748b', '#94a3b8', '#cbd5e1', '#e2e8f0', '#475569', '#334155', '#1e293b'];
+                              const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524'];
                               const segments = [];
                               wineTypeData.forEach(([type, count], idx) => {
                                 const percentage = count / total;
@@ -416,10 +418,10 @@
                           </ul>
                         </div>
                         <div className="flex items-center justify-center">
-                          <svg viewBox="0 0 200 200" className="w-64 h-64">
+                          <svg viewBox="0 0 200 200" className="w-80 h-80">
                             {(() => {
                               let currentAngle = 0;
-                              const colors = ['#64748b', '#94a3b8', '#cbd5e1', '#e2e8f0', '#475569', '#334155', '#1e293b', '#0f172a', '#78716c'];
+                              const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524', '#0f172a', '#71717a'];
                               const segments = [];
                               countryData.forEach(([country, count], idx) => {
                                 const percentage = count / total;
@@ -489,10 +491,10 @@
                           </ul>
                         </div>
                         <div className="flex items-center justify-center">
-                          <svg viewBox="0 0 200 200" className="w-64 h-64">
+                          <svg viewBox="0 0 200 200" className="w-80 h-80">
                             {(() => {
                               let currentAngle = 0;
-                              const colors = ['#64748b', '#94a3b8', '#cbd5e1', '#e2e8f0', '#475569', '#334155', '#1e293b', '#0f172a', '#78716c', '#57534e'];
+                              const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524', '#0f172a', '#71717a', '#52525b'];
                               const segments = [];
                               grapeData.slice(0, 10).forEach(([grape, count], idx) => {
                                 const percentage = count / total;
@@ -558,10 +560,10 @@
                           </ul>
                         </div>
                         <div className="flex items-center justify-center">
-                          <svg viewBox="0 0 200 200" className="w-64 h-64">
+                          <svg viewBox="0 0 200 200" className="w-80 h-80">
                             {(() => {
                               let currentAngle = 0;
-                              const colors = ['#64748b', '#94a3b8', '#cbd5e1', '#e2e8f0', '#475569', '#334155', '#1e293b', '#0f172a', '#78716c', '#57534e'];
+                              const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524', '#0f172a', '#71717a', '#52525b'];
                               const segments = [];
                               qualityData.forEach(([rating, count], idx) => {
                                 const percentage = count / total;
