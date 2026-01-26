@@ -108,8 +108,12 @@
             ...form
           } : { action: 'add', ...form };
           
+          console.log('Sending to server:', body);
+          
           const r = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(body) });
           const res = await r.json();
+          
+          console.log('Server response:', res);
           
           if (res.success) {
             if (editId) setWines(wines.map(w => w.id === editId ? { ...form, id: editId } : w));
@@ -132,11 +136,13 @@
         if (!confirm('Slette?')) return;
         try {
           const w = wines.find(w => w.id === id);
+          console.log('Deleting wine:', w);
           const r = await fetch(SCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify({ action: 'delete', name: w.name, dateTasted: w.dateTasted })
           });
           const res = await r.json();
+          console.log('Delete response:', res);
           if (res.success) { setWines(wines.filter(x => x.id !== id)); alert('Slettet!'); }
           else alert('Feil: ' + res.message);
         } catch (e) { alert('Feil: ' + e.message); }
@@ -351,7 +357,7 @@
                                 segments.push(
                                   <g key={type}>
                                     <path d={path} fill={colors[idx % colors.length]} />
-                                    {percentage > 0.05 && <text x={labelX} y={labelY} fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">{Math.round(percentage * 100)}%</text>}
+                                    {percentage > 0.05 && <text x={labelX} y={labelY} fontSize="9" fill="white" textAnchor="middle" fontWeight="bold">{type}</text>}
                                   </g>
                                 );
                                 currentAngle = endAngle;
@@ -415,7 +421,7 @@
                                 segments.push(
                                   <g key={country}>
                                     <path d={path} fill={colors[idx % colors.length]} />
-                                    {percentage > 0.05 && <text x={labelX} y={labelY} fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">{Math.round(percentage * 100)}%</text>}
+                                    {percentage > 0.05 && <text x={labelX} y={labelY} fontSize="9" fill="white" textAnchor="middle" fontWeight="bold">{country}</text>}
                                   </g>
                                 );
                                 currentAngle = endAngle;
@@ -488,7 +494,7 @@
                                 segments.push(
                                   <g key={grape}>
                                     <path d={path} fill={colors[idx % colors.length]} />
-                                    {percentage > 0.05 && <text x={labelX} y={labelY} fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">{Math.round(percentage * 100)}%</text>}
+                                    {percentage > 0.08 && <text x={labelX} y={labelY} fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">{grape}</text>}
                                   </g>
                                 );
                                 currentAngle = endAngle;
@@ -557,7 +563,7 @@
                                 segments.push(
                                   <g key={rating}>
                                     <path d={path} fill={colors[idx % colors.length]} />
-                                    {percentage > 0.05 && <text x={labelX} y={labelY} fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">{Math.round(percentage * 100)}%</text>}
+                                    {percentage > 0.05 && <text x={labelX} y={labelY} fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">{rating}⭐</text>}
                                   </g>
                                 );
                                 currentAngle = endAngle;
