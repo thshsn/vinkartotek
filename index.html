@@ -438,19 +438,19 @@
                                 </select>
                               )}
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
                                 <ul className="space-y-2">
                                   {data.map(([name, count]) => (
-                                    <li key={name} className="flex justify-between items-center">
-                                      <span>{name}</span>
-                                      <span className="font-semibold">{count} ({Math.round(count/total*100)}%)</span>
+                                    <li key={name} className="flex justify-between items-center gap-2">
+                                      <span className="flex-1">{name}</span>
+                                      <span className="font-semibold whitespace-nowrap">{count} ({Math.round(count/total*100)}%)</span>
                                     </li>
                                   ))}
                                 </ul>
                               </div>
                               <div className="flex items-start justify-center">
-                                <svg viewBox="0 0 200 200" className="w-80 h-80">
+                                <svg viewBox="0 0 200 200" className="w-96 h-96">
                                   {(() => {
                                     let currentAngle = 0;
                                     const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524', '#0f172a', '#71717a', '#52525b'];
@@ -501,19 +501,19 @@
                   return wineTypeData.length > 0 && (
                     <div className="bg-white rounded-lg shadow-lg p-6">
                       <h3 className="text-xl font-bold mb-4">Type vin</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <ul className="space-y-2">
                             {wineTypeData.map(([type, count]) => (
-                              <li key={type} className="flex justify-between items-center">
-                                <span>{type}</span>
-                                <span className="font-semibold">{count} ({Math.round(count/total*100)}%)</span>
+                              <li key={type} className="flex justify-between items-center gap-2">
+                                <span className="flex-1">{type}</span>
+                                <span className="font-semibold whitespace-nowrap">{count} ({Math.round(count/total*100)}%)</span>
                               </li>
                             ))}
                           </ul>
                         </div>
                         <div className="flex items-start justify-center">
-                          <svg viewBox="0 0 200 200" className="w-80 h-80">
+                          <svg viewBox="0 0 200 200" className="w-96 h-96">
                             {(() => {
                               let currentAngle = 0;
                               const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524'];
@@ -574,19 +574,19 @@
                   return grapeData.length > 0 && (
                     <div className="bg-white rounded-lg shadow-lg p-6">
                       <h3 className="text-xl font-bold mb-4">Druer</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <ul className="space-y-2 max-h-96 overflow-y-auto">
                             {grapeData.map(([grape, count]) => (
-                              <li key={grape} className="flex justify-between items-center">
-                                <span>{grape}</span>
-                                <span className="font-semibold">{Math.round(count/total*100)}%</span>
+                              <li key={grape} className="flex justify-between items-center gap-2">
+                                <span className="flex-1">{grape}</span>
+                                <span className="font-semibold whitespace-nowrap">{Math.round(count/total*100)}%</span>
                               </li>
                             ))}
                           </ul>
                         </div>
                         <div className="flex items-start justify-center">
-                          <svg viewBox="0 0 200 200" className="w-80 h-80">
+                          <svg viewBox="0 0 200 200" className="w-96 h-96">
                             {(() => {
                               let currentAngle = 0;
                               const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524', '#0f172a', '#71717a', '#52525b'];
@@ -643,19 +643,19 @@
                   return qualityData.length > 0 && (
                     <div className="bg-white rounded-lg shadow-lg p-6">
                       <h3 className="text-xl font-bold mb-4">Kvalitet</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <ul className="space-y-2">
                             {qualityData.map(([rating, count]) => (
-                              <li key={rating} className="flex justify-between items-center">
-                                <span>{rating}★</span>
-                                <span className="font-semibold">{count} ({Math.round(count/total*100)}%)</span>
+                              <li key={rating} className="flex justify-between items-center gap-2">
+                                <span className="flex-1">{rating}★</span>
+                                <span className="font-semibold whitespace-nowrap">{count} ({Math.round(count/total*100)}%)</span>
                               </li>
                             ))}
                           </ul>
                         </div>
                         <div className="flex items-start justify-center">
-                          <svg viewBox="0 0 200 200" className="w-80 h-80">
+                          <svg viewBox="0 0 200 200" className="w-96 h-96">
                             {(() => {
                               let currentAngle = 0;
                               const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524', '#0f172a', '#71717a', '#52525b'];
