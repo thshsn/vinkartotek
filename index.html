@@ -294,10 +294,230 @@
             )}
 
             {view === 'stats' && (
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h3 className="text-xl font-bold mb-4">Sammendrag</h3>
-                <p className="text-3xl font-bold text-purple-600">{wines.length}</p>
-                <p>Totalt viner</p>
+              <div className="space-y-6">
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h3 className="text-xl font-bold mb-4">Sammendrag</h3>
+                  <p className="text-3xl font-bold text-purple-600">{wines.length}</p>
+                  <p>Totalt viner</p>
+                </div>
+
+                {/* Type vin statistics */}
+                {(() => {
+                  const wineTypeCounts = {};
+                  wines.forEach(w => {
+                    if (w.wineType) {
+                      wineTypeCounts[w.wineType] = (wineTypeCounts[w.wineType] || 0) + 1;
+                    }
+                  });
+                  const wineTypeData = Object.entries(wineTypeCounts).sort((a, b) => b[1] - a[1]);
+                  const total = wineTypeData.reduce((sum, [, count]) => sum + count, 0);
+                  
+                  return wineTypeData.length > 0 && (
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                      <h3 className="text-xl font-bold mb-4">Type vin</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <ul className="space-y-2">
+                            {wineTypeData.map(([type, count]) => (
+                              <li key={type} className="flex justify-between items-center">
+                                <span>{type}</span>
+                                <span className="font-semibold">{count} ({Math.round(count/total*100)}%)</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="flex items-center justify-center">
+                          <svg viewBox="0 0 200 200" className="w-64 h-64">
+                            {(() => {
+                              let currentAngle = 0;
+                              const colors = ['#9333ea', '#c084fc', '#e9d5ff', '#f3e8ff', '#faf5ff', '#a78bfa', '#8b5cf6'];
+                              return wineTypeData.map(([type, count], idx) => {
+                                const percentage = count / total;
+                                const angle = percentage * 360;
+                                const endAngle = currentAngle + angle;
+                                const x1 = 100 + 80 * Math.cos((currentAngle - 90) * Math.PI / 180);
+                                const y1 = 100 + 80 * Math.sin((currentAngle - 90) * Math.PI / 180);
+                                const x2 = 100 + 80 * Math.cos((endAngle - 90) * Math.PI / 180);
+                                const y2 = 100 + 80 * Math.sin((endAngle - 90) * Math.PI / 180);
+                                const largeArc = angle > 180 ? 1 : 0;
+                                const path = `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`;
+                                currentAngle = endAngle;
+                                return <path key={type} d={path} fill={colors[idx % colors.length]} />;
+                              });
+                            })()}
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Land statistics */}
+                {(() => {
+                  const countryCounts = {};
+                  wines.forEach(w => {
+                    if (w.country) {
+                      countryCounts[w.country] = (countryCounts[w.country] || 0) + 1;
+                    }
+                  });
+                  const countryData = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]);
+                  const total = countryData.reduce((sum, [, count]) => sum + count, 0);
+                  
+                  return countryData.length > 0 && (
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                      <h3 className="text-xl font-bold mb-4">Land</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <ul className="space-y-2">
+                            {countryData.map(([country, count]) => (
+                              <li key={country} className="flex justify-between items-center">
+                                <span>{country}</span>
+                                <span className="font-semibold">{count} ({Math.round(count/total*100)}%)</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="flex items-center justify-center">
+                          <svg viewBox="0 0 200 200" className="w-64 h-64">
+                            {(() => {
+                              let currentAngle = 0;
+                              const colors = ['#9333ea', '#c084fc', '#e9d5ff', '#f3e8ff', '#faf5ff', '#a78bfa', '#8b5cf6', '#7c3aed', '#6d28d9'];
+                              return countryData.map(([country, count], idx) => {
+                                const percentage = count / total;
+                                const angle = percentage * 360;
+                                const endAngle = currentAngle + angle;
+                                const x1 = 100 + 80 * Math.cos((currentAngle - 90) * Math.PI / 180);
+                                const y1 = 100 + 80 * Math.sin((currentAngle - 90) * Math.PI / 180);
+                                const x2 = 100 + 80 * Math.cos((endAngle - 90) * Math.PI / 180);
+                                const y2 = 100 + 80 * Math.sin((endAngle - 90) * Math.PI / 180);
+                                const largeArc = angle > 180 ? 1 : 0;
+                                const path = `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`;
+                                currentAngle = endAngle;
+                                return <path key={country} d={path} fill={colors[idx % colors.length]} />;
+                              });
+                            })()}
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Druer statistics */}
+                {(() => {
+                  const grapeCounts = {};
+                  wines.forEach(w => {
+                    if (w.grapes) {
+                      // Parse grapes field: "Tempranillo 100%", "Cabernet Sauvignon 60%, Merlot 40%", etc.
+                      const grapeEntries = w.grapes.split(',').map(g => g.trim());
+                      grapeEntries.forEach(entry => {
+                        const match = entry.match(/^(.+?)\s+(\d+(?:\.\d+)?)\s*%\s*$/);
+                        if (match) {
+                          const grapeName = match[1].trim();
+                          const percentage = parseFloat(match[2]);
+                          grapeCounts[grapeName] = (grapeCounts[grapeName] || 0) + percentage;
+                        }
+                      });
+                    }
+                  });
+                  const grapeData = Object.entries(grapeCounts).sort((a, b) => b[1] - a[1]);
+                  const total = grapeData.reduce((sum, [, count]) => sum + count, 0);
+                  
+                  return grapeData.length > 0 && (
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                      <h3 className="text-xl font-bold mb-4">Druer</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <ul className="space-y-2 max-h-96 overflow-y-auto">
+                            {grapeData.map(([grape, count]) => (
+                              <li key={grape} className="flex justify-between items-center">
+                                <span>{grape}</span>
+                                <span className="font-semibold">{Math.round(count)}% ({Math.round(count/total*100)}%)</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="flex items-center justify-center">
+                          <svg viewBox="0 0 200 200" className="w-64 h-64">
+                            {(() => {
+                              let currentAngle = 0;
+                              const colors = ['#9333ea', '#c084fc', '#e9d5ff', '#f3e8ff', '#faf5ff', '#a78bfa', '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6'];
+                              return grapeData.slice(0, 10).map(([grape, count], idx) => {
+                                const percentage = count / total;
+                                const angle = percentage * 360;
+                                const endAngle = currentAngle + angle;
+                                const x1 = 100 + 80 * Math.cos((currentAngle - 90) * Math.PI / 180);
+                                const y1 = 100 + 80 * Math.sin((currentAngle - 90) * Math.PI / 180);
+                                const x2 = 100 + 80 * Math.cos((endAngle - 90) * Math.PI / 180);
+                                const y2 = 100 + 80 * Math.sin((endAngle - 90) * Math.PI / 180);
+                                const largeArc = angle > 180 ? 1 : 0;
+                                const path = `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`;
+                                currentAngle = endAngle;
+                                return <path key={grape} d={path} fill={colors[idx % colors.length]} />;
+                              });
+                            })()}
+                          </svg>
+                        </div>
+                      </div>
+                      {grapeData.length > 10 && <p className="text-sm text-gray-500 mt-2">Diagram viser topp 10 druer</p>}
+                    </div>
+                  );
+                })()}
+
+                {/* Quality statistics */}
+                {(() => {
+                  const qualityCounts = {};
+                  wines.forEach(w => {
+                    if (w.quality) {
+                      const rating = parseFloat(w.quality);
+                      if (!isNaN(rating)) {
+                        const ratingStr = rating.toString();
+                        qualityCounts[ratingStr] = (qualityCounts[ratingStr] || 0) + 1;
+                      }
+                    }
+                  });
+                  const qualityData = Object.entries(qualityCounts).sort((a, b) => parseFloat(b[0]) - parseFloat(a[0]));
+                  const total = qualityData.reduce((sum, [, count]) => sum + count, 0);
+                  
+                  return qualityData.length > 0 && (
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                      <h3 className="text-xl font-bold mb-4">Kvalitet</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <ul className="space-y-2">
+                            {qualityData.map(([rating, count]) => (
+                              <li key={rating} className="flex justify-between items-center">
+                                <span>{rating} ⭐</span>
+                                <span className="font-semibold">{count} ({Math.round(count/total*100)}%)</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="flex items-center justify-center">
+                          <svg viewBox="0 0 200 200" className="w-64 h-64">
+                            {(() => {
+                              let currentAngle = 0;
+                              const colors = ['#9333ea', '#c084fc', '#e9d5ff', '#f3e8ff', '#faf5ff', '#a78bfa', '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6'];
+                              return qualityData.map(([rating, count], idx) => {
+                                const percentage = count / total;
+                                const angle = percentage * 360;
+                                const endAngle = currentAngle + angle;
+                                const x1 = 100 + 80 * Math.cos((currentAngle - 90) * Math.PI / 180);
+                                const y1 = 100 + 80 * Math.sin((currentAngle - 90) * Math.PI / 180);
+                                const x2 = 100 + 80 * Math.cos((endAngle - 90) * Math.PI / 180);
+                                const y2 = 100 + 80 * Math.sin((endAngle - 90) * Math.PI / 180);
+                                const largeArc = angle > 180 ? 1 : 0;
+                                const path = `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`;
+                                currentAngle = endAngle;
+                                return <path key={rating} d={path} fill={colors[idx % colors.length]} />;
+                              });
+                            })()}
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
