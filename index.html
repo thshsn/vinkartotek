@@ -66,6 +66,7 @@
       const [search, setSearch] = useState('');
       const [sortBy, setSortBy] = useState('newest');
       const [filterWineType, setFilterWineType] = useState('');
+      const [filterQuality, setFilterQuality] = useState('');
       const [filterCountry, setFilterCountry] = useState('');
       const [filterRegion, setFilterRegion] = useState('');
       const [filterSubRegion, setFilterSubRegion] = useState('');
@@ -194,13 +195,17 @@
       const filtered = wines.filter(w => {
         const matchesSearch = Object.values(w).some(v => String(v).toLowerCase().includes(search.toLowerCase()));
         const matchesWineType = !filterWineType || w.wineType === filterWineType;
+        const matchesQuality = !filterQuality || w.quality === filterQuality;
         const matchesCountry = !filterCountry || w.country === filterCountry;
         const matchesRegion = !filterRegion || w.region === filterRegion;
         const matchesSubRegion = !filterSubRegion || w.subRegion === filterSubRegion;
-        return matchesSearch && matchesWineType && matchesCountry && matchesRegion && matchesSubRegion;
+        return matchesSearch && matchesWineType && matchesQuality && matchesCountry && matchesRegion && matchesSubRegion;
       });
 
       const uniqueCountries = [...new Set(wines.map(w => w.country).filter(Boolean))].sort();
+      
+      // Get unique quality ratings sorted by rating
+      const uniqueQualities = [...new Set(wines.map(w => w.quality).filter(Boolean))].sort((a, b) => parseFloat(b) - parseFloat(a));
       
       // Get regions for selected country
       const uniqueRegions = filterCountry 
@@ -263,7 +268,7 @@
                       </button>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <select value={filterWineType} onChange={(e) => setFilterWineType(e.target.value)} className="px-3 py-2 border rounded-lg text-sm">
                       <option value="">Alle typer</option>
                       <option value="Rødvin">Rødvin</option>
@@ -273,6 +278,12 @@
                       <option value="Musserende vin">Musserende vin</option>
                       <option value="Musserende rosévin">Musserende rosévin</option>
                       <option value="Dessertvin">Dessertvin</option>
+                    </select>
+                    <select value={filterQuality} onChange={(e) => setFilterQuality(e.target.value)} className="px-3 py-2 border rounded-lg text-sm">
+                      <option value="">Alle stjerner</option>
+                      {uniqueQualities.map(q => (
+                        <option key={q} value={q}>{q}★</option>
+                      ))}
                     </select>
                     <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-3 py-2 border rounded-lg text-sm">
                       <option value="newest">Nyeste først</option>
