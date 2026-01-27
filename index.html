@@ -86,6 +86,21 @@
         sweetness: '', acid: '', tannin: '', body: '', taste: '', length: '', quality: ''
       });
 
+      // Password protection for editing
+      const checkPassword = () => {
+        const authorized = localStorage.getItem('vinkartotek_auth');
+        if (authorized === 'true') {
+          return true;
+        }
+        const password = prompt('Passord påkrevd for å gjøre endringer:');
+        if (password === 'Arteta') {
+          localStorage.setItem('vinkartotek_auth', 'true');
+          return true;
+        }
+        alert('Feil passord');
+        return false;
+      };
+
       // Smart scroll function - only scrolls if field is not fully visible
       const handleFieldFocus = (e) => {
         const modal = document.getElementById('formModal');
@@ -180,6 +195,7 @@
       };
 
       const del = async (id) => {
+        if (!checkPassword()) return;
         if (!confirm('Slette?')) return;
         try {
           const w = wines.find(w => w.id === id);
@@ -244,7 +260,7 @@
               <div className="flex items-center justify-between mb-6">
                 <h1 className="text-3xl font-bold">🗂 Vinkartotek</h1>
                 <div className="flex gap-2">
-                  <button onClick={() => setShowForm(true)} className="bg-slate-700 text-white px-3 py-1.5 rounded-lg hover:bg-slate-800 text-sm">
+                  <button onClick={() => { if (checkPassword()) setShowForm(true); }} className="bg-slate-700 text-white px-3 py-1.5 rounded-lg hover:bg-slate-800 text-sm">
                     +
                   </button>
                   <button 
@@ -385,7 +401,7 @@
                         )}
                         <div className="flex gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                           {w.url && <a href={w.url} target="_blank" className="w-8 h-8 flex items-center justify-center text-purple-600">🔗</a>}
-                          <button onClick={(e) => { e.stopPropagation(); setForm(w); setEditId(w.id); setShowForm(true); }} className="w-8 h-8 bg-slate-700 text-white rounded-lg hover:bg-slate-800 text-sm flex items-center justify-center flex-shrink-0">✎</button>
+                          <button onClick={(e) => { e.stopPropagation(); if (checkPassword()) { setForm(w); setEditId(w.id); setShowForm(true); } }} className="w-8 h-8 bg-slate-700 text-white rounded-lg hover:bg-slate-800 text-sm flex items-center justify-center flex-shrink-0">✎</button>
                           <button onClick={(e) => { e.stopPropagation(); del(w.id); }} className="w-8 h-8 bg-slate-600 text-white rounded-lg hover:bg-slate-700 text-sm flex items-center justify-center flex-shrink-0">✕</button>
                         </div>
                       </div>
@@ -1039,7 +1055,7 @@
                     )}
                   </div>
                   <div className="sticky bottom-0 bg-white flex gap-4 p-6 border-t">
-                    <button onClick={() => { setForm(selectedWine); setEditId(selectedWine.id); setShowDetails(false); setShowForm(true); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">✎</button>
+                    <button onClick={() => { if (checkPassword()) { setForm(selectedWine); setEditId(selectedWine.id); setShowDetails(false); setShowForm(true); } }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">✎</button>
                     <button onClick={() => { setShowDetails(false); setSelectedWine(null); }} className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold">Lukk</button>
                   </div>
                 </div>
