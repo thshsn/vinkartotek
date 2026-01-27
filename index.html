@@ -225,24 +225,24 @@
               <div className="flex items-center justify-between mb-6">
                 <h1 className="text-3xl font-bold">🗂 Vinkartotek</h1>
                 <div className="flex gap-2">
-                  <button onClick={() => setShowForm(true)} className="bg-slate-700 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg hover:bg-slate-800 text-sm sm:text-base">
+                  <button onClick={() => setShowForm(true)} className="bg-slate-700 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg hover:bg-slate-800 text-sm md:text-base">
                     + Legg til
                   </button>
-                  <button onClick={() => { loadData(); alert('Oppdatert!'); }} className="bg-slate-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg hover:bg-slate-700 text-sm sm:text-base">
+                  <button onClick={() => { loadData(); alert('Oppdatert!'); }} className="bg-slate-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg hover:bg-slate-700 text-sm md:text-base">
                     ↻ Oppdater
                   </button>
                 </div>
               </div>
               
-              <div className="flex gap-2 sm:gap-4 mb-6">
-                <button onClick={() => setView('list')} className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-sm sm:text-base ${view === 'list' ? 'bg-slate-700 text-white' : 'bg-gray-200'}`}>Utforsk</button>
-                <button onClick={() => setView('stats')} className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-sm sm:text-base ${view === 'stats' ? 'bg-slate-700 text-white' : 'bg-gray-200'}`}>Statistikk</button>
+              <div className="flex gap-2 md:gap-4 mb-6">
+                <button onClick={() => setView('list')} className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm md:text-base ${view === 'list' ? 'bg-slate-700 text-white' : 'bg-gray-200'}`}>Utforsk</button>
+                <button onClick={() => setView('stats')} className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm md:text-base ${view === 'stats' ? 'bg-slate-700 text-white' : 'bg-gray-200'}`}>Statistikk</button>
               </div>
 
               {view === 'list' && (
                 <div className="space-y-4">
                   <div className="relative">
-                    <input type="text" placeholder="Søk..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg pr-10 text-sm sm:text-base" />
+                    <input type="text" placeholder="Søk..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full px-3 py-2 md:px-4 md:py-3 border rounded-lg pr-10 text-sm md:text-base" />
                     {search && (
                       <button 
                         onClick={() => setSearch('')}
@@ -253,7 +253,7 @@
                     )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <select value={filterWineType} onChange={(e) => setFilterWineType(e.target.value)} className="px-3 py-2 sm:px-4 sm:py-3 border rounded-lg text-sm sm:text-base">
+                    <select value={filterWineType} onChange={(e) => setFilterWineType(e.target.value)} className="px-3 py-2 md:px-4 md:py-3 border rounded-lg text-sm md:text-base">
                       <option value="">Alle typer</option>
                       <option value="Rødvin">Rødvin</option>
                       <option value="Hvitvin">Hvitvin</option>
@@ -263,7 +263,7 @@
                       <option value="Musserende rosévin">Musserende rosévin</option>
                       <option value="Dessertvin">Dessertvin</option>
                     </select>
-                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-3 py-2 sm:px-4 sm:py-3 border rounded-lg text-sm sm:text-base">
+                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-3 py-2 md:px-4 md:py-3 border rounded-lg text-sm md:text-base">
                       <option value="newest">Nyeste først</option>
                       <option value="quality">Kvalitet</option>
                       <option value="country">Land</option>
@@ -278,7 +278,7 @@
                         setFilterRegion('');
                         setFilterSubRegion('');
                       }} 
-                      className="px-3 py-2 sm:px-4 sm:py-3 border rounded-lg text-sm sm:text-base"
+                      className="px-3 py-2 md:px-4 md:py-3 border rounded-lg text-sm md:text-base"
                     >
                       <option value="">Alle land</option>
                       {uniqueCountries.map(country => (
@@ -326,11 +326,11 @@
                   </div>
                 ) : (
                   sorted.map(w => (
-                    <div key={w.id} className="bg-white rounded-lg shadow-lg p-4 sm:p-6 cursor-pointer hover:shadow-xl transition-shadow" onClick={() => { setSelectedWine(w); setShowDetails(true); }}>
-                      <div className="flex justify-between mb-3 sm:mb-4">
+                    <div key={w.id} className="bg-white rounded-lg shadow-lg p-3 md:p-6 cursor-pointer hover:shadow-xl transition-shadow" onClick={() => { setSelectedWine(w); setShowDetails(true); }}>
+                      <div className="flex justify-between mb-2 md:mb-4">
                         <div>
-                          <h3 className="text-xl sm:text-2xl font-bold">{w.name}</h3>
-                          <div className="text-xs sm:text-sm">
+                          <h3 className="text-lg md:text-2xl font-bold">{w.name}</h3>
+                          <div className="text-xs md:text-sm">
                             {w.wineType && <span className="mr-4 text-gray-900">{w.wineType}</span>}
                             {w.country && <span className="text-gray-700">{w.country}</span>}
                             {w.region && <span className="ml-2 text-gray-600">{w.region}</span>}
@@ -346,7 +346,7 @@
                       </div>
                       {w.quality && (
                         <div className="mb-2">
-                          <span className="text-slate-700 font-bold text-lg sm:text-xl">
+                          <span className="text-slate-700 font-bold text-base md:text-xl">
                             {(() => {
                               const rating = parseFloat(w.quality) || 0;
                               let stars = '';
