@@ -35,6 +35,17 @@
       return dateValue;
     };
     
+    // Helper function to convert date to Norwegian format (dd.mm.yyyy)
+    const toNorwegianDate = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
+    };
+    
     // Helper function to get wine type emoji
     const getWineTypeEmoji = (wineType) => {
       const emojiMap = {
@@ -334,7 +345,7 @@
                           {w.country && <span className="text-gray-700">{w.country}</span>}
                           {w.region && <span className="ml-2 text-gray-600">{w.region}</span>}
                           {w.subRegion && <span className="ml-2 text-gray-500">{w.subRegion}</span>}
-                          {w.dateTasted && <span className="ml-4 text-gray-600">{w.dateTasted}</span>}
+                          {w.dateTasted && <span className="ml-4 text-gray-600">{toNorwegianDate(w.dateTasted)}</span>}
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
@@ -868,7 +879,7 @@
                       {selectedWine.dateTasted && (
                         <>
                           <div className="text-gray-500">Dato smakt</div>
-                          <div className="col-span-3">{selectedWine.dateTasted}</div>
+                          <div className="col-span-3">{toNorwegianDate(selectedWine.dateTasted)}</div>
                         </>
                       )}
                       {selectedWine.country && (
