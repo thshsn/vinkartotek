@@ -73,6 +73,22 @@
         sweetness: '', acid: '', tannin: '', body: '', taste: '', length: '', quality: ''
       });
 
+      // Smart scroll function - only scrolls if field is not fully visible
+      const handleFieldFocus = (e) => {
+        const modal = document.getElementById('formModal');
+        if (!modal) return;
+        
+        const rect = e.target.getBoundingClientRect();
+        const modalRect = modal.getBoundingClientRect();
+        const relativeTop = rect.top - modalRect.top;
+        const relativeBottom = rect.bottom - modalRect.top;
+        
+        // Only scroll if field is cut off at bottom or too close to top
+        if (relativeBottom > modal.clientHeight - 20 || relativeTop < 80) {
+          modal.scrollTop += relativeTop - 100;
+        }
+      };
+
       useEffect(() => { loadData(); }, []);
 
       const loadData = async () => {
@@ -453,7 +469,7 @@
                                 <svg viewBox="0 0 200 200" className="w-96 h-96">
                                   {(() => {
                                     let currentAngle = 0;
-                                    const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524', '#0f172a', '#71717a', '#52525b'];
+                                    const colors = ['#dc2626', '#ea580c', '#d97706', '#ca8a04', '#65a30d', '#16a34a', '#059669', '#0d9488', '#0891b2', '#0284c7', '#2563eb', '#4f46e5', '#7c3aed', '#9333ea', '#c026d3', '#db2777', '#e11d48', '#b91c1c', '#c2410c', '#b45309'];
                                     const segments = [];
                                     data.forEach(([name, count], idx) => {
                                       const percentage = count / total;
@@ -516,7 +532,7 @@
                           <svg viewBox="0 0 200 200" className="w-96 h-96">
                             {(() => {
                               let currentAngle = 0;
-                              const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524'];
+                              const colors = ['#dc2626', '#ea580c', '#d97706', '#ca8a04', '#65a30d', '#16a34a', '#059669', '#0d9488', '#0891b2', '#0284c7', '#2563eb', '#4f46e5', '#7c3aed', '#9333ea', '#c026d3', '#db2777', '#e11d48', '#b91c1c', '#c2410c', '#b45309'];
                               const segments = [];
                               wineTypeData.forEach(([type, count], idx) => {
                                 const percentage = count / total;
@@ -589,9 +605,9 @@
                           <svg viewBox="0 0 200 200" className="w-96 h-96">
                             {(() => {
                               let currentAngle = 0;
-                              const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524', '#0f172a', '#71717a', '#52525b'];
+                              const colors = ['#dc2626', '#ea580c', '#d97706', '#ca8a04', '#65a30d', '#16a34a', '#059669', '#0d9488', '#0891b2', '#0284c7', '#2563eb', '#4f46e5', '#7c3aed', '#9333ea', '#c026d3', '#db2777', '#e11d48', '#b91c1c', '#c2410c', '#b45309'];
                               const segments = [];
-                              grapeData.slice(0, 10).forEach(([grape, count], idx) => {
+                              grapeData.slice(0, 20).forEach(([grape, count], idx) => {
                                 const percentage = count / total;
                                 const angle = percentage * 360;
                                 const endAngle = currentAngle + angle;
@@ -620,7 +636,7 @@
                           </svg>
                         </div>
                       </div>
-                      {grapeData.length > 10 && <p className="text-sm text-gray-500 mt-2">Diagram viser topp 10 druer</p>}
+                      {grapeData.length > 20 && <p className="text-sm text-gray-500 mt-2">Diagram viser topp 20 druer</p>}
                     </div>
                   );
                 })()}
@@ -658,7 +674,7 @@
                           <svg viewBox="0 0 200 200" className="w-96 h-96">
                             {(() => {
                               let currentAngle = 0;
-                              const colors = ['#1e293b', '#334155', '#475569', '#64748b', '#78716c', '#94a3b8', '#a8a29e', '#cbd5e1', '#d6d3d1', '#e2e8f0', '#57534e', '#44403c', '#292524', '#0f172a', '#71717a', '#52525b'];
+                              const colors = ['#dc2626', '#ea580c', '#d97706', '#ca8a04', '#65a30d', '#16a34a', '#059669', '#0d9488', '#0891b2', '#0284c7', '#2563eb', '#4f46e5', '#7c3aed', '#9333ea', '#c026d3', '#db2777', '#e11d48', '#b91c1c', '#c2410c', '#b45309'];
                               const segments = [];
                               qualityData.forEach(([rating, count], idx) => {
                                 const percentage = count / total;
@@ -882,17 +898,17 @@
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-2">Vinnavn *</label>
-                        <input type="text" value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="w-full px-4 py-2 border rounded-lg" />
+                        <input type="text" value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} onFocus={handleFieldFocus} className="w-full px-4 py-2 border rounded-lg" />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">URL</label>
-                        <input type="url" value={form.url} onChange={(e) => setForm(p => ({ ...p, url: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="w-full px-4 py-2 border rounded-lg" />
+                        <input type="url" value={form.url} onChange={(e) => setForm(p => ({ ...p, url: e.target.value }))} onFocus={handleFieldFocus} className="w-full px-4 py-2 border rounded-lg" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-2">Type vin</label>
-                        <select value={form.wineType} onChange={(e) => setForm(p => ({ ...p, wineType: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="w-full px-4 py-2 border rounded-lg">
+                        <select value={form.wineType} onChange={(e) => setForm(p => ({ ...p, wineType: e.target.value }))} onFocus={handleFieldFocus} className="w-full px-4 py-2 border rounded-lg">
                           <option value="">Velg type</option>
                           <option value="Rødvin">Rødvin</option>
                           <option value="Hvitvin">Hvitvin</option>
@@ -905,42 +921,42 @@
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">Dato</label>
-                        <input type="date" value={form.dateTasted} onChange={(e) => setForm(p => ({ ...p, dateTasted: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="w-full px-4 py-2 border rounded-lg" />
+                        <input type="date" value={form.dateTasted} onChange={(e) => setForm(p => ({ ...p, dateTasted: e.target.value }))} onFocus={handleFieldFocus} className="w-full px-4 py-2 border rounded-lg" />
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-4">
-                      <input placeholder="Land" value={form.country} onChange={(e) => setForm(p => ({ ...p, country: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-4 py-2 border rounded-lg" />
-                      <input placeholder="Region" value={form.region} onChange={(e) => setForm(p => ({ ...p, region: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-4 py-2 border rounded-lg" />
-                      <input placeholder="Underregion" value={form.subRegion} onChange={(e) => setForm(p => ({ ...p, subRegion: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-4 py-2 border rounded-lg" />
+                      <input placeholder="Land" value={form.country} onChange={(e) => setForm(p => ({ ...p, country: e.target.value }))} onFocus={handleFieldFocus} className="px-4 py-2 border rounded-lg" />
+                      <input placeholder="Region" value={form.region} onChange={(e) => setForm(p => ({ ...p, region: e.target.value }))} onFocus={handleFieldFocus} className="px-4 py-2 border rounded-lg" />
+                      <input placeholder="Underregion" value={form.subRegion} onChange={(e) => setForm(p => ({ ...p, subRegion: e.target.value }))} onFocus={handleFieldFocus} className="px-4 py-2 border rounded-lg" />
                     </div>
-                    <input placeholder="Druer" value={form.grapes} onChange={(e) => setForm(p => ({ ...p, grapes: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="w-full px-4 py-2 border rounded-lg" />
+                    <input placeholder="Druer" value={form.grapes} onChange={(e) => setForm(p => ({ ...p, grapes: e.target.value }))} onFocus={handleFieldFocus} className="w-full px-4 py-2 border rounded-lg" />
                     <div>
                       <h3 className="font-semibold mb-2">Utseende</h3>
                       <div className="grid grid-cols-3 gap-2">
-                        <input placeholder="Klarhet" value={form.sightClarity} onChange={(e) => setForm(p => ({ ...p, sightClarity: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-3 py-2 border rounded-lg text-sm" />
-                        <input placeholder="Intensitet" value={form.sightIntensity} onChange={(e) => setForm(p => ({ ...p, sightIntensity: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-3 py-2 border rounded-lg text-sm" />
-                        <input placeholder="Farge" value={form.sightColor} onChange={(e) => setForm(p => ({ ...p, sightColor: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-3 py-2 border rounded-lg text-sm" />
+                        <input placeholder="Klarhet" value={form.sightClarity} onChange={(e) => setForm(p => ({ ...p, sightClarity: e.target.value }))} onFocus={handleFieldFocus} className="px-3 py-2 border rounded-lg text-sm" />
+                        <input placeholder="Intensitet" value={form.sightIntensity} onChange={(e) => setForm(p => ({ ...p, sightIntensity: e.target.value }))} onFocus={handleFieldFocus} className="px-3 py-2 border rounded-lg text-sm" />
+                        <input placeholder="Farge" value={form.sightColor} onChange={(e) => setForm(p => ({ ...p, sightColor: e.target.value }))} onFocus={handleFieldFocus} className="px-3 py-2 border rounded-lg text-sm" />
                       </div>
                     </div>
                     <div>
                       <h3 className="font-semibold mb-2">Duft</h3>
                       <div className="grid grid-cols-4 gap-2 mb-2">
-                        <input placeholder="Tilstand" value={form.noseCondition} onChange={(e) => setForm(p => ({ ...p, noseCondition: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-3 py-2 border rounded-lg text-sm self-start" />
-                        <input placeholder="Intensitet" value={form.noseIntensity} onChange={(e) => setForm(p => ({ ...p, noseIntensity: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-3 py-2 border rounded-lg text-sm self-start" />
-                        <textarea placeholder="Aroma" value={form.noseAroma} onChange={(e) => setForm(p => ({ ...p, noseAroma: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} rows={3} className="px-3 py-2 border rounded-lg text-sm resize-none col-span-2" />
+                        <input placeholder="Tilstand" value={form.noseCondition} onChange={(e) => setForm(p => ({ ...p, noseCondition: e.target.value }))} onFocus={handleFieldFocus} className="px-3 py-2 border rounded-lg text-sm self-start" />
+                        <input placeholder="Intensitet" value={form.noseIntensity} onChange={(e) => setForm(p => ({ ...p, noseIntensity: e.target.value }))} onFocus={handleFieldFocus} className="px-3 py-2 border rounded-lg text-sm self-start" />
+                        <textarea placeholder="Aroma" value={form.noseAroma} onChange={(e) => setForm(p => ({ ...p, noseAroma: e.target.value }))} onFocus={handleFieldFocus} rows={3} className="px-3 py-2 border rounded-lg text-sm resize-none col-span-2" />
                       </div>
                     </div>
                     <div>
                       <h3 className="font-semibold mb-2">Smak</h3>
                       <div className="grid grid-cols-4 gap-2 mb-2">
-                        <input placeholder="Sødme" value={form.sweetness} onChange={(e) => setForm(p => ({ ...p, sweetness: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-3 py-2 border rounded-lg text-sm self-start" />
-                        <input placeholder="Syrlighet" value={form.acid} onChange={(e) => setForm(p => ({ ...p, acid: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-3 py-2 border rounded-lg text-sm self-start" />
-                        <input placeholder="Tannin" value={form.tannin} onChange={(e) => setForm(p => ({ ...p, tannin: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-3 py-2 border rounded-lg text-sm self-start" />
-                        <input placeholder="Kropp" value={form.body} onChange={(e) => setForm(p => ({ ...p, body: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-3 py-2 border rounded-lg text-sm self-start" />
+                        <input placeholder="Sødme" value={form.sweetness} onChange={(e) => setForm(p => ({ ...p, sweetness: e.target.value }))} onFocus={handleFieldFocus} className="px-3 py-2 border rounded-lg text-sm self-start" />
+                        <input placeholder="Syrlighet" value={form.acid} onChange={(e) => setForm(p => ({ ...p, acid: e.target.value }))} onFocus={handleFieldFocus} className="px-3 py-2 border rounded-lg text-sm self-start" />
+                        <input placeholder="Tannin" value={form.tannin} onChange={(e) => setForm(p => ({ ...p, tannin: e.target.value }))} onFocus={handleFieldFocus} className="px-3 py-2 border rounded-lg text-sm self-start" />
+                        <input placeholder="Kropp" value={form.body} onChange={(e) => setForm(p => ({ ...p, body: e.target.value }))} onFocus={handleFieldFocus} className="px-3 py-2 border rounded-lg text-sm self-start" />
                       </div>
                       <div className="grid grid-cols-4 gap-2">
-                        <textarea placeholder="Smak" value={form.taste} onChange={(e) => setForm(p => ({ ...p, taste: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} rows={3} className="px-3 py-2 border rounded-lg text-sm resize-none col-span-3" />
-                        <input placeholder="Lengde" value={form.length} onChange={(e) => setForm(p => ({ ...p, length: e.target.value }))} onFocus={(e) => { const modal = document.getElementById('formModal'); if (modal) { const rect = e.target.getBoundingClientRect(); const modalRect = modal.getBoundingClientRect(); modal.scrollTop += rect.top - modalRect.top - 100; } }} className="px-3 py-2 border rounded-lg text-sm align-top self-start" />
+                        <textarea placeholder="Smak" value={form.taste} onChange={(e) => setForm(p => ({ ...p, taste: e.target.value }))} onFocus={handleFieldFocus} rows={3} className="px-3 py-2 border rounded-lg text-sm resize-none col-span-3" />
+                        <input placeholder="Lengde" value={form.length} onChange={(e) => setForm(p => ({ ...p, length: e.target.value }))} onFocus={handleFieldFocus} className="px-3 py-2 border rounded-lg text-sm align-top self-start" />
                       </div>
                     </div>
                     <div>
