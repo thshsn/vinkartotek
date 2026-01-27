@@ -307,6 +307,9 @@
 
             {view === 'list' && (
               <div className="space-y-4">
+                <div className="text-center py-2">
+                  <span className="text-lg font-semibold text-gray-700">{sorted.length} {sorted.length === 1 ? 'vin' : 'viner'}</span>
+                </div>
                 {sorted.length === 0 ? (
                   <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
                     {wines.length === 0 ? 'Ingen viner' : 'Ingen match'}
