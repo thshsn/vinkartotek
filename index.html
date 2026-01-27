@@ -439,33 +439,50 @@
 
                         return data.length > 0 && (
                           <div className="bg-white rounded-lg shadow-lg p-6">
-                            <div className="flex items-center gap-4 mb-4">
-                              <h3 className="text-xl font-bold">{chartTitle} ({data.length})</h3>
-                              <select 
-                                value={statsCountryFilter} 
-                                onChange={(e) => { 
-                                  setStatsCountryFilter(e.target.value); 
-                                  setStatsRegionFilter(''); 
-                                }} 
-                                className="px-3 py-1 border rounded text-sm"
-                              >
-                                <option value="">Alle land</option>
-                                {countries.map(c => (
-                                  <option key={c} value={c}>{c}</option>
-                                ))}
-                              </select>
-                              {statsCountryFilter && (
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-4">
+                                <h3 className="text-xl font-bold">{chartTitle} ({data.length})</h3>
                                 <select 
-                                  value={statsRegionFilter} 
-                                  onChange={(e) => setStatsRegionFilter(e.target.value)} 
+                                  value={statsCountryFilter} 
+                                  onChange={(e) => { 
+                                    setStatsCountryFilter(e.target.value); 
+                                    setStatsRegionFilter(''); 
+                                  }} 
                                   className="px-3 py-1 border rounded text-sm"
                                 >
-                                  <option value="">Alle regioner</option>
-                                  {regions.map(r => (
-                                    <option key={r} value={r}>{r}</option>
+                                  <option value="">Alle land</option>
+                                  {countries.map(c => (
+                                    <option key={c} value={c}>{c}</option>
                                   ))}
                                 </select>
-                              )}
+                                {statsCountryFilter && (
+                                  <select 
+                                    value={statsRegionFilter} 
+                                    onChange={(e) => setStatsRegionFilter(e.target.value)} 
+                                    className="px-3 py-1 border rounded text-sm"
+                                  >
+                                    <option value="">Alle regioner</option>
+                                    {regions.map(r => (
+                                      <option key={r} value={r}>{r}</option>
+                                    ))}
+                                  </select>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => {
+                                  const csv = 'Navn,Antall,Prosent\n' + data.map(([name, count]) => 
+                                    `"${name}",${count},${Math.round(count/total*100)}%`
+                                  ).join('\n');
+                                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                                  const link = document.createElement('a');
+                                  link.href = URL.createObjectURL(blob);
+                                  link.download = `${chartTitle.replace(/ /g, '_')}.csv`;
+                                  link.click();
+                                }}
+                                className="px-3 py-1 bg-slate-600 text-white rounded text-sm hover:bg-slate-700"
+                              >
+                                Eksporter
+                              </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
@@ -535,7 +552,24 @@
                   
                   return wineTypeData.length > 0 && (
                     <div className="bg-white rounded-lg shadow-lg p-6">
-                      <h3 className="text-xl font-bold mb-4">Type vin</h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-bold">Type vin</h3>
+                        <button
+                          onClick={() => {
+                            const csv = 'Type vin,Antall,Prosent\n' + wineTypeData.map(([type, count]) => 
+                              `"${type}",${count},${Math.round(count/total*100)}%`
+                            ).join('\n');
+                            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = 'Type_vin.csv';
+                            link.click();
+                          }}
+                          className="px-3 py-1 bg-slate-600 text-white rounded text-sm hover:bg-slate-700"
+                        >
+                          Eksporter
+                        </button>
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <ul className="space-y-2">
@@ -614,7 +648,35 @@
                   
                   return grapeData.length > 0 && (
                     <div className="bg-white rounded-lg shadow-lg p-6">
-                      <h3 className="text-xl font-bold mb-4">Druer ({grapeData.length})</h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-bold">Druer ({grapeData.length})</h3>
+                        <button
+                          onClick={() => {
+                            const csv = 'Drue,Prosent\n' + grapeData.map(([grape, count]) => {
+                              const percentage = count/total*100;
+                              let displayPercentage;
+                              if (percentage >= 1) {
+                                displayPercentage = Math.round(percentage) + '%';
+                              } else if (percentage >= 0.1) {
+                                displayPercentage = percentage.toFixed(1) + '%';
+                              } else if (percentage >= 0.01) {
+                                displayPercentage = percentage.toFixed(2) + '%';
+                              } else {
+                                displayPercentage = percentage.toFixed(3) + '%';
+                              }
+                              return `"${grape}",${displayPercentage}`;
+                            }).join('\n');
+                            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = 'Druer.csv';
+                            link.click();
+                          }}
+                          className="px-3 py-1 bg-slate-600 text-white rounded text-sm hover:bg-slate-700"
+                        >
+                          Eksporter
+                        </button>
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <ul className="space-y-2 max-h-96 overflow-y-auto">
@@ -703,7 +765,24 @@
                   
                   return qualityData.length > 0 && (
                     <div className="bg-white rounded-lg shadow-lg p-6">
-                      <h3 className="text-xl font-bold mb-4">Kvalitet</h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-bold">Kvalitet</h3>
+                        <button
+                          onClick={() => {
+                            const csv = 'Kvalitet,Antall,Prosent\n' + qualityData.map(([rating, count]) => 
+                              `${rating},${count},${Math.round(count/total*100)}%`
+                            ).join('\n');
+                            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = 'Kvalitet.csv';
+                            link.click();
+                          }}
+                          className="px-3 py-1 bg-slate-600 text-white rounded text-sm hover:bg-slate-700"
+                        >
+                          Eksporter
+                        </button>
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <ul className="space-y-2">
