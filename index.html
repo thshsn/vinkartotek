@@ -75,6 +75,7 @@
       const [selectedWine, setSelectedWine] = useState(null);
       const [editId, setEditId] = useState(null);
       const [saving, setSaving] = useState(false);
+      const [loading, setLoading] = useState(false);
       const [statsCountryFilter, setStatsCountryFilter] = useState('');
       const [statsRegionFilter, setStatsRegionFilter] = useState('');
       const [form, setForm] = useState({
@@ -104,6 +105,7 @@
       useEffect(() => { loadData(); }, []);
 
       const loadData = async () => {
+        setLoading(true);
         try {
           const r = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`);
           const t = await r.text();
@@ -137,6 +139,7 @@
           });
           setWines(ws);
         } catch (e) { alert('Feil: ' + e.message); }
+        finally { setLoading(false); }
       };
 
       const save = async () => {
@@ -244,8 +247,12 @@
                   <button onClick={() => setShowForm(true)} className="bg-slate-700 text-white px-3 py-1.5 rounded-lg hover:bg-slate-800 text-sm">
                     +
                   </button>
-                  <button onClick={() => { loadData(); }} className="bg-slate-600 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 text-sm">
-                    ↻
+                  <button 
+                    onClick={() => { loadData(); }} 
+                    disabled={loading}
+                    className={`bg-slate-600 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 text-sm ${loading ? 'opacity-50' : ''}`}
+                  >
+                    <span className={loading ? 'inline-block animate-spin' : ''}>↻</span>
                   </button>
                 </div>
               </div>
