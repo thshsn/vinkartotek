@@ -893,15 +893,15 @@
               <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-auto">
                 <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full my-8 max-h-screen overflow-y-auto">
                   <div className="sticky top-0 bg-white px-6 py-4 border-b flex justify-between items-center">
-                    <h2 className="text-xl font-bold">{selectedWine.name}</h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-bold">{selectedWine.name}</h2>
+                      {selectedWine.url && (
+                        <a href={selectedWine.url} target="_blank" className="text-purple-600 hover:text-purple-700">🔗</a>
+                      )}
+                    </div>
                     <button onClick={() => { setShowDetails(false); setSelectedWine(null); }} className="text-2xl text-gray-500 hover:text-gray-700">×</button>
                   </div>
                   <div className="px-6 py-4 space-y-3">
-                    {selectedWine.url && (
-                      <div className="pb-2 border-b">
-                        <a href={selectedWine.url} target="_blank" className="text-sm text-slate-600 hover:underline break-all">{selectedWine.url}</a>
-                      </div>
-                    )}
                     
                     <div className="grid grid-cols-4 gap-x-4 gap-y-2 text-sm">
                       {selectedWine.wineType && (
