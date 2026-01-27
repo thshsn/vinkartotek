@@ -327,39 +327,39 @@
                 ) : (
                   sorted.map(w => (
                     <div key={w.id} className="bg-white rounded-lg shadow-lg p-3 cursor-pointer hover:shadow-xl transition-shadow" onClick={() => { setSelectedWine(w); setShowDetails(true); }}>
-                      <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-2">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-bold">{w.name}</h3>
-                          <div className="text-xs">
-                            {w.wineType && <span className="mr-4 text-gray-900">{w.wineType}</span>}
-                            {w.country && <span className="text-gray-700">{w.country}</span>}
-                            {w.region && <span className="ml-2 text-gray-600">{w.region}</span>}
-                            {w.subRegion && <span className="ml-2 text-gray-500">{w.subRegion}</span>}
-                            {w.dateTasted && <span className="ml-4 text-gray-600">{w.dateTasted}</span>}
-                          </div>
+                      <div className="mb-2">
+                        <h3 className="text-lg font-bold">{w.name}</h3>
+                        <div className="text-xs">
+                          {w.wineType && <span className="mr-4 text-gray-900">{w.wineType}</span>}
+                          {w.country && <span className="text-gray-700">{w.country}</span>}
+                          {w.region && <span className="ml-2 text-gray-600">{w.region}</span>}
+                          {w.subRegion && <span className="ml-2 text-gray-500">{w.subRegion}</span>}
+                          {w.dateTasted && <span className="ml-4 text-gray-600">{w.dateTasted}</span>}
                         </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        {w.quality && (
+                          <div>
+                            <span className="text-slate-700 font-bold text-base">
+                              {(() => {
+                                const rating = parseFloat(w.quality) || 0;
+                                let stars = '';
+                                for (let i = 1; i <= 5; i++) {
+                                  if (rating >= i) stars += '★';
+                                  else if (rating >= i - 0.5) stars += '½';
+                                  else stars += '☆';
+                                }
+                                return stars;
+                              })()}
+                            </span>
+                          </div>
+                        )}
                         <div className="flex gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                           {w.url && <a href={w.url} target="_blank" className="w-8 h-8 flex items-center justify-center text-purple-600">🔗</a>}
                           <button onClick={(e) => { e.stopPropagation(); setForm(w); setEditId(w.id); setShowForm(true); }} className="w-8 h-8 bg-slate-700 text-white rounded-lg hover:bg-slate-800 text-sm flex items-center justify-center flex-shrink-0">✎</button>
                           <button onClick={(e) => { e.stopPropagation(); del(w.id); }} className="w-8 h-8 bg-slate-600 text-white rounded-lg hover:bg-slate-700 text-sm flex items-center justify-center flex-shrink-0">✕</button>
                         </div>
                       </div>
-                      {w.quality && (
-                        <div className="mb-2">
-                          <span className="text-slate-700 font-bold text-base">
-                            {(() => {
-                              const rating = parseFloat(w.quality) || 0;
-                              let stars = '';
-                              for (let i = 1; i <= 5; i++) {
-                                if (rating >= i) stars += '★';
-                                else if (rating >= i - 0.5) stars += '½';
-                                else stars += '☆';
-                              }
-                              return stars;
-                            })()}
-                          </span>
-                        </div>
-                      )}
                     </div>
                   ))
                 )}
