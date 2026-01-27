@@ -1084,11 +1084,71 @@
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-4">
-                      <input placeholder="Land" value={form.country} onChange={(e) => setForm(p => ({ ...p, country: e.target.value }))} onFocus={handleFieldFocus} className="px-4 py-2 border rounded-lg" />
-                      <input placeholder="Region" value={form.region} onChange={(e) => setForm(p => ({ ...p, region: e.target.value }))} onFocus={handleFieldFocus} className="px-4 py-2 border rounded-lg" />
-                      <input placeholder="Underregion" value={form.subRegion} onChange={(e) => setForm(p => ({ ...p, subRegion: e.target.value }))} onFocus={handleFieldFocus} className="px-4 py-2 border rounded-lg" />
+                      <input 
+                        placeholder="Land" 
+                        value={form.country} 
+                        onChange={(e) => setForm(p => ({ ...p, country: e.target.value, region: '', subRegion: '' }))} 
+                        onFocus={handleFieldFocus} 
+                        className="px-4 py-2 border rounded-lg"
+                        list="countries-list"
+                      />
+                      <datalist id="countries-list">
+                        {[...new Set(wines.map(w => w.country).filter(Boolean))].sort().map(c => (
+                          <option key={c} value={c} />
+                        ))}
+                      </datalist>
+                      
+                      <input 
+                        placeholder="Region" 
+                        value={form.region} 
+                        onChange={(e) => setForm(p => ({ ...p, region: e.target.value, subRegion: '' }))} 
+                        onFocus={handleFieldFocus} 
+                        className="px-4 py-2 border rounded-lg"
+                        list="regions-list"
+                      />
+                      <datalist id="regions-list">
+                        {form.country && [...new Set(wines.filter(w => w.country === form.country).map(w => w.region).filter(Boolean))].sort().map(r => (
+                          <option key={r} value={r} />
+                        ))}
+                      </datalist>
+                      
+                      <input 
+                        placeholder="Underregion" 
+                        value={form.subRegion} 
+                        onChange={(e) => setForm(p => ({ ...p, subRegion: e.target.value }))} 
+                        onFocus={handleFieldFocus} 
+                        className="px-4 py-2 border rounded-lg"
+                        list="subregions-list"
+                      />
+                      <datalist id="subregions-list">
+                        {form.region && [...new Set(wines.filter(w => w.region === form.region).map(w => w.subRegion).filter(Boolean))].sort().map(sr => (
+                          <option key={sr} value={sr} />
+                        ))}
+                      </datalist>
                     </div>
-                    <input placeholder="Druer" value={form.grapes} onChange={(e) => setForm(p => ({ ...p, grapes: e.target.value }))} onFocus={handleFieldFocus} className="w-full px-2 py-1.5 border rounded-lg text-sm" />
+                    
+                    <input 
+                      placeholder="Druer" 
+                      value={form.grapes} 
+                      onChange={(e) => setForm(p => ({ ...p, grapes: e.target.value }))} 
+                      onFocus={handleFieldFocus} 
+                      className="w-full px-2 py-1.5 border rounded-lg text-sm"
+                      list="grapes-list"
+                    />
+                    <datalist id="grapes-list">
+                      {(() => {
+                        const grapeSet = new Set();
+                        wines.filter(w => !form.country || w.country === form.country).forEach(w => {
+                          if (w.grapes) {
+                            w.grapes.split(',').forEach(g => {
+                              const grape = g.trim().replace(/\d+(\.\d+)?%/g, '').trim();
+                              if (grape) grapeSet.add(grape);
+                            });
+                          }
+                        });
+                        return [...grapeSet].sort().map(g => <option key={g} value={g} />);
+                      })()}
+                    </datalist>
                     <div>
                       <h3 className="font-semibold mb-2">Utseende</h3>
                       <div className="grid grid-cols-3 gap-2">
