@@ -427,7 +427,7 @@
                         return data.length > 0 && (
                           <div className="bg-white rounded-lg shadow-lg p-6">
                             <div className="flex items-center gap-4 mb-4">
-                              <h3 className="text-xl font-bold">{chartTitle}</h3>
+                              <h3 className="text-xl font-bold">{chartTitle} ({data.length})</h3>
                               <select 
                                 value={statsCountryFilter} 
                                 onChange={(e) => { 
@@ -601,7 +601,7 @@
                   
                   return grapeData.length > 0 && (
                     <div className="bg-white rounded-lg shadow-lg p-6">
-                      <h3 className="text-xl font-bold mb-4">Druer</h3>
+                      <h3 className="text-xl font-bold mb-4">Druer ({grapeData.length})</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <ul className="space-y-2 max-h-96 overflow-y-auto">
