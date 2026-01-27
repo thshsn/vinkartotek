@@ -83,8 +83,8 @@
         const relativeTop = rect.top - modalRect.top;
         const relativeBottom = rect.bottom - modalRect.top;
         
-        // Only scroll if field is cut off at bottom or too close to top
-        if (relativeBottom > modal.clientHeight - 20 || relativeTop < 80) {
+        // Scroll if field is cut off at bottom (within 100px of modal edge) or too close to top
+        if (relativeBottom > modal.clientHeight - 100 || relativeTop < 80) {
           modal.scrollTop += relativeTop - 100;
         }
       };
@@ -607,8 +607,11 @@
                               let currentAngle = 0;
                               const colors = ['#dc2626', '#ea580c', '#d97706', '#ca8a04', '#65a30d', '#16a34a', '#059669', '#0d9488', '#0891b2', '#0284c7', '#2563eb', '#4f46e5', '#7c3aed', '#9333ea', '#c026d3', '#db2777', '#e11d48', '#b91c1c', '#c2410c', '#b45309'];
                               const segments = [];
-                              grapeData.slice(0, 20).forEach(([grape, count], idx) => {
-                                const percentage = count / total;
+                              const top20 = grapeData.slice(0, 20);
+                              const top20Total = top20.reduce((sum, [, count]) => sum + count, 0);
+                              
+                              top20.forEach(([grape, count], idx) => {
+                                const percentage = count / top20Total;
                                 const angle = percentage * 360;
                                 const endAngle = currentAngle + angle;
                                 const x1 = 100 + 80 * Math.cos((currentAngle - 90) * Math.PI / 180);
