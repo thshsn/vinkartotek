@@ -356,6 +356,22 @@
                       ))}
                     </select>
                   </div>
+                  <div className="flex justify-end">
+                    <button 
+                      onClick={() => {
+                        setSearch('');
+                        setFilterWineType('');
+                        setFilterQuality('');
+                        setFilterCountry('');
+                        setFilterRegion('');
+                        setFilterSubRegion('');
+                        setSortBy('newest');
+                      }}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
+                    >
+                      Nullstill
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -941,7 +957,7 @@
                                 <div className="flex items-center gap-2 flex-1">
                                   <span className="text-gray-500 font-semibold">{idx + 1}.</span>
                                   <span>{r.region}</span>
-                                  <span className="text-xs text-gray-400">({r.count} viner)</span>
+                                  <span style={{fontSize: '0.75rem', color: '#9ca3af'}}>({r.count} viner)</span>
                                 </div>
                                 <span className="font-bold text-slate-700 whitespace-nowrap">{r.average.toFixed(2)}★</span>
                               </li>
