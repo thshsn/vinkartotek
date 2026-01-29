@@ -900,8 +900,35 @@
                   );
                 })()}
 
-                {/* Top regions by average score */}
+                {/* Top countries and regions by average score */}
                 {(() => {
+                  // Calculate average score per country (minimum 10 wines)
+                  const countryStats = {};
+                  
+                  statsWines.forEach(w => {
+                    if (w.country && w.quality) {
+                      const rating = parseFloat(w.quality);
+                      if (!isNaN(rating)) {
+                        if (!countryStats[w.country]) {
+                          countryStats[w.country] = { sum: 0, count: 0 };
+                        }
+                        countryStats[w.country].sum += rating;
+                        countryStats[w.country].count += 1;
+                      }
+                    }
+                  });
+                  
+                  // Filter countries with at least 10 wines and calculate averages
+                  const topCountries = Object.entries(countryStats)
+                    .filter(([country, stats]) => stats.count >= 10)
+                    .map(([country, stats]) => ({
+                      country,
+                      count: stats.count,
+                      average: stats.sum / stats.count
+                    }))
+                    .sort((a, b) => b.average - a.average)
+                    .slice(0, 10);
+                  
                   // Calculate average score per region (minimum 10 wines)
                   const regionStats = {};
                   
@@ -929,42 +956,82 @@
                     .sort((a, b) => b.average - a.average)
                     .slice(0, 20);
                   
-                  return topRegions.length > 0 && (
+                  return (topCountries.length > 0 || topRegions.length > 0) && (
                     <div className="bg-white rounded-lg shadow-lg p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-bold">Topp 20 regioner (gjennomsnitt)</h3>
-                        <button
-                          onClick={() => {
-                            const csv = 'Region,Antall viner,Gjennomsnittskår\n' + topRegions.map(r => 
-                              `"${r.region}",${r.count},${r.average.toFixed(2)}`
-                            ).join('\n');
-                            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                            const link = document.createElement('a');
-                            link.href = URL.createObjectURL(blob);
-                            link.download = 'Topp_Regioner.csv';
-                            link.click();
-                          }}
-                          className="px-3 py-1 bg-slate-600 text-white rounded text-sm hover:bg-slate-700"
-                        >
-                          Eksporter
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <ul className="space-y-2">
-                            {topRegions.map((r, idx) => (
-                              <li key={r.region} className="flex justify-between items-center gap-2">
-                                <div className="flex items-center gap-2 flex-1">
-                                  <span className="text-gray-500 font-semibold">{idx + 1}.</span>
-                                  <span>{r.region}</span>
-                                  <span style={{fontSize: '0.75rem', color: '#9ca3af'}}>({r.count} viner)</span>
-                                </div>
-                                <span className="font-bold text-slate-700 whitespace-nowrap">{r.average.toFixed(2)}★</span>
-                              </li>
-                            ))}
-                          </ul>
-                          <p className="text-sm text-gray-500 mt-2">Kun regioner med minimum 10 registrerte viner</p>
-                        </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Top countries */}
+                        {topCountries.length > 0 && (
+                          <div>
+                            <div className="flex items-center justify-between mb-4">
+                              <h3 className="text-xl font-bold">Topp 10 land (gjennomsnitt)</h3>
+                              <button
+                                onClick={() => {
+                                  const csv = 'Land,Antall viner,Gjennomsnittskår\n' + topCountries.map(c => 
+                                    `"${c.country}",${c.count},${c.average.toFixed(2)}`
+                                  ).join('\n');
+                                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                                  const link = document.createElement('a');
+                                  link.href = URL.createObjectURL(blob);
+                                  link.download = 'Topp_Land.csv';
+                                  link.click();
+                                }}
+                                className="px-3 py-1 bg-slate-600 text-white rounded text-sm hover:bg-slate-700"
+                              >
+                                Eksporter
+                              </button>
+                            </div>
+                            <ul className="space-y-2">
+                              {topCountries.map((c, idx) => (
+                                <li key={c.country} className="flex justify-between items-center gap-2">
+                                  <div className="flex items-center gap-2 flex-1">
+                                    <span className="text-gray-500 font-semibold">{idx + 1}.</span>
+                                    <span>{c.country}</span>
+                                    <span style={{fontSize: '0.75rem', color: '#9ca3af'}}>({c.count} viner)</span>
+                                  </div>
+                                  <span className="font-bold text-slate-700 whitespace-nowrap">{c.average.toFixed(2)}★</span>
+                                </li>
+                              ))}
+                            </ul>
+                            <p className="text-sm text-gray-500 mt-2">Kun land med minimum 10 registrerte viner</p>
+                          </div>
+                        )}
+                        
+                        {/* Top regions */}
+                        {topRegions.length > 0 && (
+                          <div>
+                            <div className="flex items-center justify-between mb-4">
+                              <h3 className="text-xl font-bold">Topp 20 regioner (gjennomsnitt)</h3>
+                              <button
+                                onClick={() => {
+                                  const csv = 'Region,Antall viner,Gjennomsnittskår\n' + topRegions.map(r => 
+                                    `"${r.region}",${r.count},${r.average.toFixed(2)}`
+                                  ).join('\n');
+                                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                                  const link = document.createElement('a');
+                                  link.href = URL.createObjectURL(blob);
+                                  link.download = 'Topp_Regioner.csv';
+                                  link.click();
+                                }}
+                                className="px-3 py-1 bg-slate-600 text-white rounded text-sm hover:bg-slate-700"
+                              >
+                                Eksporter
+                              </button>
+                            </div>
+                            <ul className="space-y-2">
+                              {topRegions.map((r, idx) => (
+                                <li key={r.region} className="flex justify-between items-center gap-2">
+                                  <div className="flex items-center gap-2 flex-1">
+                                    <span className="text-gray-500 font-semibold">{idx + 1}.</span>
+                                    <span>{r.region}</span>
+                                    <span style={{fontSize: '0.75rem', color: '#9ca3af'}}>({r.count} viner)</span>
+                                  </div>
+                                  <span className="font-bold text-slate-700 whitespace-nowrap">{r.average.toFixed(2)}★</span>
+                                </li>
+                              ))}
+                            </ul>
+                            <p className="text-sm text-gray-500 mt-2">Kun regioner med minimum 10 registrerte viner</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
