@@ -238,10 +238,14 @@
 
       const sorted = [...filtered].sort((a, b) => {
         if (sortBy === 'newest') {
-          // Sort by actual date field (newest first)
+          // Sort by actual date field (newest first), then by ID for same-date wines
           const dateA = new Date(a.dateTasted || 0);
           const dateB = new Date(b.dateTasted || 0);
-          return dateB - dateA;
+          if (dateB.getTime() !== dateA.getTime()) {
+            return dateB - dateA;
+          }
+          // If dates are the same, sort by ID (higher ID = added later)
+          return b.id - a.id;
         }
         if (sortBy === 'quality') {
           const qa = parseFloat(a.quality) || 0;
